@@ -5,6 +5,7 @@ import type {
   CreateInventoryPayload,
   UpdateInventoryPayload,
   AddInventoryProductPayload,
+  AddInventoryProductBatchPayload,
   UpdateInventoryProductPayload,
   InventoryListParams,
   InventoryProductsListParams,
@@ -102,6 +103,31 @@ export function useAddInventoryProduct() {
     },
     onError: (err: unknown) =>
       toast.error((err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || "Add failed"),
+  });
+}
+
+export function useAddInventoryProductBatch() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      inventoryId,
+      payload,
+    }: {
+      inventoryId: string;
+      payload: AddInventoryProductBatchPayload;
+    }) => inventoryApi.addProductBatch(inventoryId, payload),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-products", vars.inventoryId] });
+      queryClient.invalidateQueries({ queryKey: ["inventory", vars.inventoryId] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-stats"] });
+      toast.success("Product batches added to inventory");
+    },
+    onError: (err: unknown) =>
+      toast.error(
+        (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message ||
+          "Add batch failed"
+      ),
   });
 }
 

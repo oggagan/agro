@@ -86,6 +86,12 @@ export interface InventoryProduct {
   mfgDate?: string | null;
   expiryDate?: string | null;
   purchasedFrom?: string | null;
+  mrp?: number | null;
+  sellingPrice?: number | null;
+  gstInclusive?: boolean;
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  discount?: number | null;
   unit: StockUnit;
   lowStockThreshold: number;
   product: {
@@ -103,21 +109,59 @@ export interface AddInventoryProductPayload {
   stock: number;
   price: number;
   sourceType: StockSourceType;
-  batchNumber?: string | null;
+  batchNumber: string;
   mfgDate?: string | null;
   expiryDate?: string | null;
   purchasedFrom?: string | null;
+  mrp?: number | null;
+  sellingPrice?: number | null;
+  gstInclusive?: boolean;
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  discount?: number | null;
   unit: StockUnit;
   lowStockThreshold?: number;
+}
+
+export interface AddInventoryProductBatchItem {
+  batchNumber: string;
+  mfgDate?: string | null;
+  expiryDate?: string | null;
+  stock: number;
+  unit: StockUnit;
+  price: number;
+  gstInclusive?: boolean;
+  discount?: number | null;
+}
+
+export interface AddInventoryProductBatchPayload {
+  productId: string;
+  productSizeId?: string | null;
+  sourceType: StockSourceType;
+  purchasedFrom?: string | null;
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  mrp?: number | null;
+  sellingPrice?: number | null;
+  lowStockThreshold?: number;
+  batches: AddInventoryProductBatchItem[];
 }
 
 export interface UpdateInventoryProductPayload {
   stock?: number;
   price?: number;
+  unit?: StockUnit;
+  sourceType?: StockSourceType;
   batchNumber?: string | null;
   mfgDate?: string | null;
   expiryDate?: string | null;
   purchasedFrom?: string | null;
+  mrp?: number | null;
+  sellingPrice?: number | null;
+  gstInclusive?: boolean;
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  discount?: number | null;
   lowStockThreshold?: number;
 }
 

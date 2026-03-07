@@ -92,6 +92,27 @@ export async function addProductToInventory(req: Request, res: Response, next: N
   }
 }
 
+export async function addProductBatch(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await inventoryService.addProductBatch(
+      getParam(req, 'id'),
+      req.body,
+      req.user!.userId,
+      req.user!.role,
+      getClientIp(req),
+      getUserAgent(req),
+    );
+    sendSuccess({
+      res,
+      data: result,
+      message: 'Product batches added to inventory.',
+      statusCode: 201,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function listInventoryProducts(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await inventoryService.listInventoryProducts(

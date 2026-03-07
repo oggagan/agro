@@ -59,27 +59,71 @@ export const listInventoriesQuerySchema = z.object({
   status: inventoryStatusEnum.optional(),
 });
 
+const optionalDateString = z
+  .string()
+  .optional()
+  .nullable()
+  .refine((v) => !v || !Number.isNaN(Date.parse(v)), { message: 'Invalid date' });
+
 export const addInventoryProductSchema = z.object({
   productId: z.string().uuid('Invalid product ID'),
   productSizeId: z.string().uuid().optional().nullable(),
   stock: z.number().int().min(1, 'Stock must be at least 1'),
   price: z.number().positive('Price must be positive'),
   sourceType: stockSourceTypeEnum,
-  batchNumber: z.string().optional().nullable(),
-  mfgDate: z.string().optional().nullable(),
-  expiryDate: z.string().optional().nullable(),
+  batchNumber: z.string().min(1, 'Batch number is required'),
+  mfgDate: optionalDateString,
+  expiryDate: optionalDateString,
   purchasedFrom: z.string().optional().nullable(),
+  mrp: z.number().min(0).optional().nullable(),
+  sellingPrice: z.number().min(0).optional().nullable(),
+  gstInclusive: z.boolean().optional().default(false),
+  invoiceNumber: z.string().optional().nullable(),
+  invoiceDate: optionalDateString,
+  discount: z.number().min(0).max(100).optional().nullable(),
   unit: stockUnitEnum,
   lowStockThreshold: z.number().int().min(0).optional().default(10),
+});
+
+export const addInventoryProductBatchItemSchema = z.object({
+  batchNumber: z.string().min(1, 'Batch number is required'),
+  mfgDate: optionalDateString,
+  expiryDate: optionalDateString,
+  stock: z.number().int().min(1, 'Stock must be at least 1'),
+  unit: stockUnitEnum,
+  price: z.number().positive('Price must be positive'),
+  gstInclusive: z.boolean().optional().default(false),
+  discount: z.number().min(0).max(100).optional().nullable(),
+});
+
+export const addInventoryProductBatchSchema = z.object({
+  productId: z.string().uuid('Invalid product ID'),
+  productSizeId: z.string().uuid().optional().nullable(),
+  sourceType: stockSourceTypeEnum,
+  purchasedFrom: z.string().optional().nullable(),
+  invoiceNumber: z.string().optional().nullable(),
+  invoiceDate: optionalDateString,
+  mrp: z.number().min(0).optional().nullable(),
+  sellingPrice: z.number().min(0).optional().nullable(),
+  lowStockThreshold: z.number().int().min(0).optional().default(10),
+  batches: z.array(addInventoryProductBatchItemSchema).min(1, 'At least one batch is required'),
 });
 
 export const updateInventoryProductSchema = z.object({
   stock: z.number().int().min(0).optional(),
   price: z.number().positive().optional(),
-  batchNumber: z.string().optional().nullable(),
-  mfgDate: z.string().optional().nullable(),
-  expiryDate: z.string().optional().nullable(),
+  unit: stockUnitEnum.optional(),
+  sourceType: stockSourceTypeEnum.optional(),
+  batchNumber: z.string().min(1).optional().nullable(),
+  mfgDate: optionalDateString,
+  expiryDate: optionalDateString,
   purchasedFrom: z.string().optional().nullable(),
+  mrp: z.number().min(0).optional().nullable(),
+  sellingPrice: z.number().min(0).optional().nullable(),
+  gstInclusive: z.boolean().optional(),
+  invoiceNumber: z.string().optional().nullable(),
+  invoiceDate: optionalDateString,
+  discount: z.number().min(0).max(100).optional().nullable(),
   lowStockThreshold: z.number().int().min(0).optional(),
 });
 

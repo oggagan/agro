@@ -7,6 +7,7 @@ import type {
   CreateInventoryPayload,
   UpdateInventoryPayload,
   AddInventoryProductPayload,
+  AddInventoryProductBatchPayload,
   UpdateInventoryProductPayload,
   InventoryListParams,
   InventoryProductsListParams,
@@ -39,6 +40,17 @@ export const inventoryApi = {
   addProduct: (inventoryId: string, payload: AddInventoryProductPayload) =>
     client
       .post<ApiResponse<InventoryProduct>>(`/inventories/${inventoryId}/products`, payload)
+      .then((r) => r.data),
+
+  addProductBatch: (
+    inventoryId: string,
+    payload: AddInventoryProductBatchPayload
+  ) =>
+    client
+      .post<ApiResponse<{ entries: InventoryProduct[]; totalQuantity: number; totalValue: number }>>(
+        `/inventories/${inventoryId}/products/batch`,
+        payload
+      )
       .then((r) => r.data),
 
   updateProduct: (

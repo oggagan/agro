@@ -304,6 +304,12 @@ export async function addProductToInventory(
       mfgDate,
       expiryDate,
       purchasedFrom: data.purchasedFrom ?? null,
+      mrp: data.mrp != null ? data.mrp : null,
+      sellingPrice: data.sellingPrice != null ? data.sellingPrice : null,
+      gstInclusive: data.gstInclusive === true,
+      invoiceNumber: data.invoiceNumber ?? null,
+      invoiceDate: data.invoiceDate != null ? parseOptionalDate(data.invoiceDate) : null,
+      discount: data.discount != null ? data.discount : null,
       unit: data.unit,
       lowStockThreshold: data.lowStockThreshold ?? 10,
       createdBy: performedBy,
@@ -332,6 +338,97 @@ export async function addProductToInventory(
   });
 
   return created;
+}
+
+export async function addProductBatch(
+  inventoryId: string,
+  data: Record<string, any>,
+  performedBy: string,
+  _performedByRole: string,
+  ip?: string,
+  userAgent?: string,
+) {
+  const inventory = await prisma.inventory.findFirst({ where: { id: inventoryId, ...notDeleted } });
+  if (!inventory) throw new AppError('Inventory not found.', 404, 'NOT_FOUND');
+
+  const product = await prisma.product.findFirst({ where: { id: data.productId, ...notDeleted } });
+  if (!product) throw new AppError('Product not found.', 404, 'NOT_FOUND');
+
+  const invoiceDate = data.invoiceDate != null ? parseOptionalDate(data.invoiceDate) : null;
+  const batches = data.batches as Array<{
+    batchNumber: string;
+    mfgDate?: string | null;
+    expiryDate?: string | null;
+    stock: number;
+    unit: string;
+    price: number;
+    gstInclusive?: boolean;
+    discount?: number | null;
+  }>;
+
+  const created = await prisma.$transaction(async (tx) => {
+    const entries: Awaited<ReturnType<typeof tx.inventoryProduct.create>>[] = [];
+    for (const b of batches) {
+      const mfgDate = parseOptionalDate(b.mfgDate);
+      const expiryDate = parseOptionalDate(b.expiryDate);
+      const entry = await tx.inventoryProduct.create({
+        data: {
+          inventoryId,
+          productId: data.productId,
+          productSizeId: data.productSizeId ?? null,
+          stock: b.stock,
+          price: b.price,
+          averageCost: b.price,
+          sourceType: data.sourceType,
+          batchNumber: (b.batchNumber ?? '').trim() || null,
+          mfgDate,
+          expiryDate,
+          purchasedFrom: data.purchasedFrom ?? null,
+          mrp: data.mrp != null ? data.mrp : null,
+          sellingPrice: data.sellingPrice != null ? data.sellingPrice : null,
+          gstInclusive: b.gstInclusive === true,
+          invoiceNumber: data.invoiceNumber ?? null,
+          invoiceDate,
+          discount: b.discount != null ? b.discount : null,
+          unit: b.unit as 'KG' | 'G' | 'L' | 'ML' | 'PACK' | 'BAG' | 'BOTTLE' | 'QUANTAL',
+          lowStockThreshold: data.lowStockThreshold ?? 10,
+          createdBy: performedBy,
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              productName: true,
+              technicalName: true,
+              manufacturer: { select: { companyName: true } },
+            },
+          },
+        },
+      });
+      entries.push(entry);
+    }
+    return entries;
+  });
+
+  let totalQuantity = 0;
+  let totalValue = 0;
+  for (const e of created) {
+    totalQuantity += e.stock;
+    totalValue += Number(e.price) * e.stock;
+  }
+
+  await createAuditLog({
+    action: 'CREATE',
+    entityType: 'inventory_product',
+    entityId: created[0]?.id ?? inventoryId,
+    performedBy,
+    performedByRole: _performedByRole,
+    newData: { batchCount: created.length, totalQuantity, totalValue },
+    ipAddress: ip,
+    userAgent,
+  });
+
+  return { entries: created, totalQuantity, totalValue };
 }
 
 export async function listInventoryProducts(inventoryId: string, query: Record<string, unknown>) {
@@ -430,10 +527,18 @@ export async function updateInventoryProduct(
   const updateData: Record<string, any> = { updatedBy: performedBy };
   if (data.stock !== undefined) updateData.stock = data.stock;
   if (data.price !== undefined) updateData.price = data.price;
+  if (data.unit !== undefined) updateData.unit = data.unit;
+  if (data.sourceType !== undefined) updateData.sourceType = data.sourceType;
   if (data.batchNumber !== undefined) updateData.batchNumber = data.batchNumber ?? null;
   if (data.mfgDate !== undefined) updateData.mfgDate = parseOptionalDate(data.mfgDate);
   if (data.expiryDate !== undefined) updateData.expiryDate = parseOptionalDate(data.expiryDate);
   if (data.purchasedFrom !== undefined) updateData.purchasedFrom = data.purchasedFrom ?? null;
+  if (data.mrp !== undefined) updateData.mrp = data.mrp;
+  if (data.sellingPrice !== undefined) updateData.sellingPrice = data.sellingPrice;
+  if (data.gstInclusive !== undefined) updateData.gstInclusive = data.gstInclusive;
+  if (data.invoiceNumber !== undefined) updateData.invoiceNumber = data.invoiceNumber ?? null;
+  if (data.invoiceDate !== undefined) updateData.invoiceDate = parseOptionalDate(data.invoiceDate);
+  if (data.discount !== undefined) updateData.discount = data.discount;
   if (data.lowStockThreshold !== undefined) updateData.lowStockThreshold = data.lowStockThreshold;
 
   await prisma.inventoryProduct.update({

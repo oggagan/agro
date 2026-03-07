@@ -705,6 +705,12 @@ model InventoryProduct {
   purchasedFrom    String?
   unit             StockUnit
   lowStockThreshold Int            @default(10)
+  mrp              Decimal?        @db.Decimal(12, 2)
+  sellingPrice     Decimal?        @db.Decimal(12, 2)
+  gstInclusive     Boolean         @default(false)
+  invoiceNumber    String?
+  invoiceDate      DateTime?
+  discount         Decimal?        @db.Decimal(5, 2)
   createdBy        String?         @db.Uuid
   updatedBy        String?         @db.Uuid
   deletedAt        DateTime?

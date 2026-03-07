@@ -6,6 +6,7 @@ import {
   updateInventorySchema,
   listInventoriesQuerySchema,
   addInventoryProductSchema,
+  addInventoryProductBatchSchema,
   updateInventoryProductSchema,
   listInventoryProductsQuerySchema,
 } from './inventory.validation.js';
@@ -51,6 +52,13 @@ router.post(
   authorize(ROLES.SUPER_ADMIN, ROLES.MANUFACTURER, ROLES.RETAILER, ROLES.DISTRIBUTOR),
   validate(addInventoryProductSchema),
   inventoryController.addProductToInventory,
+);
+
+router.post(
+  '/:id/products/batch',
+  authorize(ROLES.SUPER_ADMIN, ROLES.MANUFACTURER, ROLES.RETAILER, ROLES.DISTRIBUTOR),
+  validate(addInventoryProductBatchSchema),
+  inventoryController.addProductBatch,
 );
 
 router.get(

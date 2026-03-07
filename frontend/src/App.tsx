@@ -19,6 +19,7 @@ import ProductDetail from "@/pages/admin/products/ProductDetail";
 import Inventories from "@/pages/admin/inventory/Inventories";
 import InventoryForm from "@/pages/admin/inventory/InventoryForm";
 import InventoryProducts from "@/pages/admin/inventory/InventoryProducts";
+import InventoryAddProduct from "@/pages/admin/inventory/InventoryAddProduct";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +68,7 @@ function AppRoutes() {
         <Route path="admin/inventory/add" element={<InventoryForm />} />
         <Route path="admin/inventory/edit/:id" element={<InventoryForm />} />
         <Route path="admin/inventory/:id/products" element={<InventoryProducts />} />
+        <Route path="admin/inventory/:id/products/add" element={<InventoryAddProduct />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
