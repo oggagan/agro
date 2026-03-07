@@ -113,6 +113,7 @@ export async function listProducts(query: Record<string, unknown>) {
       { productName: { contains: search, mode: 'insensitive' } },
       { technicalName: { contains: search, mode: 'insensitive' } },
       { hsnCode: { contains: search, mode: 'insensitive' } },
+      { cirNumber: { contains: search, mode: 'insensitive' } },
     ];
   }
 
@@ -322,6 +323,7 @@ export async function uploadProductDocuments(
   manufacturerIdForUser?: string | null,
   ip?: string,
   userAgent?: string,
+  productSizeId?: string | null,
 ) {
   const product = await prisma.product.findFirst({ where: { id: productId, ...notDeleted } });
   if (!product) throw new AppError('Product not found.', 404, 'NOT_FOUND');
@@ -345,6 +347,7 @@ export async function uploadProductDocuments(
           fileSize: file.size,
           uploadedBy: performedBy,
           productId,
+          productSizeId: productSizeId ?? null,
         },
       }),
     ),

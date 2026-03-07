@@ -34,6 +34,8 @@ const statusStyles: Record<string, string> = {
 const PRODUCT_TYPES: ProductType[] = [
   "PESTICIDE",
   "FUNGICIDE",
+  "HERBICIDE",
+  "BACTERIACIDE",
   "PGR",
   "NPK",
   "FERTILIZER",

@@ -100,6 +100,7 @@ export async function uploadProductDocuments(req: Request, res: Response, next: 
   try {
     const files = req.files as Express.Multer.File[];
     const manufacturerIdForUser = await getManufacturerIdForUser(req);
+    const productSizeId = req.body.productSizeId as string | undefined;
     const result = await productService.uploadProductDocuments(
       getParam(req, 'id'),
       files,
@@ -109,6 +110,7 @@ export async function uploadProductDocuments(req: Request, res: Response, next: 
       manufacturerIdForUser,
       getClientIp(req),
       getUserAgent(req),
+      productSizeId,
     );
     sendSuccess({ res, data: result, message: 'Documents uploaded.', statusCode: 201 });
   } catch (error) {

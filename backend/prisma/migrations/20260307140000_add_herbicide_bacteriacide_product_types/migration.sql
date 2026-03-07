@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "ProductType" ADD VALUE 'HERBICIDE';
+ALTER TYPE "ProductType" ADD VALUE 'BACTERIACIDE';

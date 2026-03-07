@@ -88,8 +88,17 @@ export function useUploadProductDocuments() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, files, docType }: { id: string; files: File[]; docType: string }) =>
-      productsApi.uploadDocuments(id, files, docType),
+    mutationFn: ({
+      id,
+      files,
+      docType,
+      productSizeId,
+    }: {
+      id: string;
+      files: File[];
+      docType: string;
+      productSizeId?: string;
+    }) => productsApi.uploadDocuments(id, files, docType, productSizeId),
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["product", vars.id] });
       toast.success("Documents uploaded");

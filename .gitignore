@@ -14,7 +14,9 @@ build/
 .env.development
 .env.production
 .env.test
-
+*.sh
+*.conf
+deploy/
 # Logs
 logs/
 *.log

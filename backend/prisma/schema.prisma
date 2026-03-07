@@ -64,6 +64,8 @@ enum AuditAction {
 enum ProductType {
   PESTICIDE
   FUNGICIDE
+  HERBICIDE
+  BACTERIACIDE
   PGR
   NPK
   FERTILIZER

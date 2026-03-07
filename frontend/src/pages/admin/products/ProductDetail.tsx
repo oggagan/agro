@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Package } from "lucide-react";
+import { ArrowLeft, Package, Image as ImageIcon, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProduct } from "@/hooks/useProducts";
+import { productsApi } from "@/api/products.api";
 import type { ProductType } from "@/types/product";
 
 function formatProductType(t: string) {
@@ -81,6 +82,79 @@ export default function ProductDetail() {
         </CardContent>
       </Card>
 
+      {product.documents?.filter((d) => d.docType === "product_photo").length > 0 && (
+        <Card className="border-0 shadow-md bg-card">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" />
+              Product Photos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              {product.documents
+                .filter((d) => d.docType === "product_photo")
+                .map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={productsApi.getDocumentUrl(doc.filePath)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded border overflow-hidden w-24 h-24 shrink-0"
+                  >
+                    <img
+                      src={productsApi.getDocumentUrl(doc.filePath)}
+                      alt={doc.fileName}
+                      className="w-full h-full object-cover"
+                    />
+                  </a>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {(product.documents?.some((d) => d.docType === "product_pamphlet" || d.docType === "product_antidote") ?? false) && (
+        <Card className="border-0 shadow-md bg-card">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Documents
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {product.documents
+              ?.filter((d) => d.docType === "product_pamphlet")
+              .map((doc) => (
+                <a
+                  key={doc.id}
+                  href={productsApi.getDocumentUrl(doc.filePath)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Pamphlet: {doc.fileName}
+                </a>
+              ))}
+            {product.documents
+              ?.filter((d) => d.docType === "product_antidote")
+              .map((doc) => (
+                <a
+                  key={doc.id}
+                  href={productsApi.getDocumentUrl(doc.filePath)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Antidote: {doc.fileName}
+                </a>
+              ))}
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="border-0 shadow-md bg-card">
         <CardHeader>
           <CardTitle className="text-base">Tax & Dosage</CardTitle>
@@ -109,11 +183,30 @@ export default function ProductDetail() {
         </CardHeader>
         <CardContent>
           {product.sizes?.length ? (
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {product.sizes.map((s) => (
-                <li key={s.id} className="flex items-center gap-2 text-sm">
-                  <span className="font-medium">{s.quantity} {s.unit}</span>
-                  <span className="text-muted-foreground">· {s.bottlesPerCase} per case</span>
+                <li key={s.id} className="border rounded p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-medium">{s.quantity} {s.unit}</span>
+                    <span className="text-muted-foreground">· {s.bottlesPerCase} per case</span>
+                  </div>
+                  {s.documents && s.documents.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <span className="text-xs text-muted-foreground">Packaging photos:</span>
+                      {s.documents.map((doc) => (
+                        <a
+                          key={doc.id}
+                          href={productsApi.getDocumentUrl(doc.filePath)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline flex items-center gap-1"
+                        >
+                          <Download className="h-3 w-3" />
+                          {doc.fileName}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

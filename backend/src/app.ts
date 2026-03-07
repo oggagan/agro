@@ -21,8 +21,15 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // ─── Global middleware ───────────────────────────────────────────────────────
-
-app.use(cors());
+// CORS: allow all origins (same-origin when behind nginx; no CORS errors on HTTP)
+app.use(
+  cors({
+    origin: true, // reflect request origin so same-origin and any host work
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -27,10 +27,11 @@ export const productsApi = {
   delete: (id: string) =>
     client.delete<ApiResponse<{ message: string }>>(`/products/${id}`).then((r) => r.data),
 
-  uploadDocuments: (id: string, files: File[], docType: string) => {
+  uploadDocuments: (id: string, files: File[], docType: string, productSizeId?: string) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     formData.append("docType", docType);
+    if (productSizeId) formData.append("productSizeId", productSizeId);
     return client
       .post<ApiResponse<{ documents: unknown[]; message: string }>>(`/products/${id}/documents`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -40,4 +41,7 @@ export const productsApi = {
 
   deleteDocument: (id: string, docId: string) =>
     client.delete<ApiResponse<{ message: string }>>(`/products/${id}/documents/${docId}`).then((r) => r.data),
+
+  getDocumentUrl: (filePath: string) =>
+    `/api/v1/uploads/${filePath.split("/").pop() || filePath}`,
 };

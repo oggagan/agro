@@ -3,6 +3,8 @@ import { z } from 'zod';
 const productTypeEnum = z.enum([
   'PESTICIDE',
   'FUNGICIDE',
+  'HERBICIDE',
+  'BACTERIACIDE',
   'PGR',
   'NPK',
   'FERTILIZER',

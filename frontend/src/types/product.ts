@@ -1,6 +1,8 @@
 export type ProductType =
   | "PESTICIDE"
   | "FUNGICIDE"
+  | "HERBICIDE"
+  | "BACTERIACIDE"
   | "PGR"
   | "NPK"
   | "FERTILIZER"
