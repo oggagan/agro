@@ -10,6 +10,8 @@ import { errorHandler } from './middleware/error.middleware.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import userRoutes from './modules/user/user.routes.js';
 import manufacturerRoutes from './modules/manufacturer/manufacturer.routes.js';
+import retailerRoutes from './modules/retailer/retailer.routes.js';
+import distributorRoutes from './modules/distributor/distributor.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,6 +71,8 @@ app.get('/api/v1/health', (_req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/manufacturers', manufacturerRoutes);
+app.use('/api/v1/retailers', retailerRoutes);
+app.use('/api/v1/distributors', distributorRoutes);
 
 // ─── Error handling ──────────────────────────────────────────────────────────
 

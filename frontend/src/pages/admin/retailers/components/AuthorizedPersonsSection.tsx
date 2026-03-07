@@ -4,36 +4,36 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Pencil, FileUp, Trash2 } from "lucide-react";
 import AuthorizedPersonForm from "./AuthorizedPersonForm";
-import { useRemoveAuthorizedPerson } from "@/hooks/useManufacturers";
-import type { AuthorizedPerson } from "@/types/manufacturer";
+import { useRemoveRetailerAuthorizedPerson } from "@/hooks/useRetailers";
+import type { RetailerAuthorizedPerson } from "@/types/retailer";
 
 interface AuthorizedPersonsSectionProps {
-  manufacturerId: string;
-  authorizedPersons: AuthorizedPerson[];
+  retailerId: string;
+  authorizedPersons: RetailerAuthorizedPerson[];
 }
 
 export default function AuthorizedPersonsSection({
-  manufacturerId,
+  retailerId,
   authorizedPersons,
 }: AuthorizedPersonsSectionProps) {
-  const [selectedAp, setSelectedAp] = useState<AuthorizedPerson | null | undefined>(undefined);
+  const [selectedAp, setSelectedAp] = useState<RetailerAuthorizedPerson | null | undefined>(undefined);
   const [addMode, setAddMode] = useState(false);
-  const removeAp = useRemoveAuthorizedPerson();
+  const removeAp = useRemoveRetailerAuthorizedPerson();
 
   const showForm = addMode || selectedAp !== undefined;
   const formExisting = addMode ? null : selectedAp ?? null;
 
-  const displayName = (ap: AuthorizedPerson) =>
+  const displayName = (ap: RetailerAuthorizedPerson) =>
     ap.displayName ?? ap.user?.name ?? "—";
-  const displayPhone = (ap: AuthorizedPerson) =>
+  const displayPhone = (ap: RetailerAuthorizedPerson) =>
     ap.displayPhone ?? ap.user?.phones?.[0]?.number ?? "—";
-  const displayEmail = (ap: AuthorizedPerson) =>
+  const displayEmail = (ap: RetailerAuthorizedPerson) =>
     ap.displayEmail ?? ap.user?.emails?.[0]?.address ?? null;
 
-  const handleRemove = (ap: AuthorizedPerson) => {
+  const handleRemove = (ap: RetailerAuthorizedPerson) => {
     if (!confirm(`Remove ${displayName(ap)}?`)) return;
     removeAp.mutate(
-      { mfgId: manufacturerId, apId: ap.id },
+      { retailerId, apId: ap.id },
       { onSuccess: () => setSelectedAp(undefined) }
     );
   };
@@ -127,7 +127,7 @@ export default function AuthorizedPersonsSection({
           </CardHeader>
           <CardContent>
             <AuthorizedPersonForm
-              manufacturerId={manufacturerId}
+              retailerId={retailerId}
               apId={selectedAp.id}
               existing={selectedAp}
               onClose={() => setSelectedAp(undefined)}
@@ -143,16 +143,12 @@ export default function AuthorizedPersonsSection({
           </CardHeader>
           <CardContent>
             <AuthorizedPersonForm
-              manufacturerId={manufacturerId}
+              retailerId={retailerId}
               existing={null}
               onClose={() => setAddMode(false)}
             />
           </CardContent>
         </Card>
-      )}
-
-      {!showForm && authorizedPersons.length === 0 && (
-        <p className="text-muted-foreground text-sm">No authorized persons yet. Add one above.</p>
       )}
     </div>
   );

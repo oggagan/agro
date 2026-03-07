@@ -15,6 +15,8 @@ enum Role {
   MANUFACTURER
   AUTHORIZED_PERSON
   DIRECTOR
+  RETAILER
+  DISTRIBUTOR
 }
 
 enum UserStatus {
@@ -36,6 +38,18 @@ enum DirectorType {
   DIRECTOR
   PARTNER
   PROPRIETOR
+}
+
+enum LicenseCategory {
+  SEEDS
+  INSECTICIDE
+  FERTILIZER
+}
+
+enum DistributorType {
+  STATE_DISTRIBUTOR
+  UNDER_MANUFACTURER
+  UNDER_RETAILER
 }
 
 enum AuditAction {
@@ -74,6 +88,8 @@ model User {
   emails             Email[]
   refreshTokens      RefreshToken[]
   manufacturer       Manufacturer?
+  retailer           Retailer?
+  distributor        Distributor?
   authorizedPersons  AuthorizedPerson[]
   directors          Director[]
   auditLogs          AuditLog[]
@@ -163,53 +179,178 @@ model Manufacturer {
   directors         Director[]
   authorizedPersons AuthorizedPerson[]
   documents         Document[]
+  distributors      Distributor[]
 
   @@index([userId])
   @@index([deletedAt])
   @@map("manufacturers")
 }
 
+// ─── Retailer ────────────────────────────────────────────────────────────────
+
+model Retailer {
+  id             String      @id @default(uuid()) @db.Uuid
+  userId         String      @unique @db.Uuid
+  companyName    String
+  companyType    CompanyType
+  gstNumber      String?
+  companyPan     String?
+  isDraft        Boolean     @default(false)
+  createdBy      String?     @db.Uuid
+  updatedBy      String?     @db.Uuid
+  deletedAt      DateTime?
+  deletedBy      String?     @db.Uuid
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addresses         Address[]
+  bankDetails       BankDetails[]
+  licenses          RetailerLicense[]
+  directors         Director[]
+  authorizedPersons AuthorizedPerson[]
+  documents         Document[]
+  distributors      Distributor[]
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("retailers")
+}
+
+// ─── RetailerLicense ────────────────────────────────────────────────────────
+
+model RetailerLicense {
+  id            String          @id @default(uuid()) @db.Uuid
+  retailerId    String          @db.Uuid
+  category      LicenseCategory
+  licenseNumber String?
+  validUptoDate DateTime?
+  createdBy     String?         @db.Uuid
+  updatedBy     String?         @db.Uuid
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  retailer  Retailer   @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  documents Document[]
+
+  @@unique([retailerId, category])
+  @@index([retailerId])
+  @@map("retailer_licenses")
+}
+
+// ─── Distributor ─────────────────────────────────────────────────────────────
+
+model Distributor {
+  id               String          @id @default(uuid()) @db.Uuid
+  userId           String          @unique @db.Uuid
+  distributorType  DistributorType
+  gstNumber        String?
+  licenseNumber    String?
+  licenseValidUpto DateTime?
+  manufacturerId   String?         @db.Uuid
+  retailerId       String?         @db.Uuid
+  companyName      String?
+  companyType      CompanyType?
+  companyPan       String?
+  isDraft          Boolean         @default(false)
+  createdBy        String?         @db.Uuid
+  updatedBy        String?         @db.Uuid
+  deletedAt        DateTime?
+  deletedBy        String?         @db.Uuid
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manufacturer      Manufacturer?      @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  retailer          Retailer?          @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  addresses         Address[]
+  bankDetails       BankDetails[]
+  licenses          DistributorLicense[]
+  directors         Director[]
+  authorizedPersons AuthorizedPerson[]
+  documents         Document[]
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@index([manufacturerId])
+  @@index([retailerId])
+  @@map("distributors")
+}
+
+// ─── DistributorLicense ─────────────────────────────────────────────────────
+
+model DistributorLicense {
+  id            String          @id @default(uuid()) @db.Uuid
+  distributorId String          @db.Uuid
+  category      LicenseCategory
+  licenseNumber String?
+  validUptoDate DateTime?
+  createdBy     String?         @db.Uuid
+  updatedBy     String?         @db.Uuid
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  distributor Distributor @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  documents   Document[]
+
+  @@unique([distributorId, category])
+  @@index([distributorId])
+  @@map("distributor_licenses")
+}
+
 // ─── Address ─────────────────────────────────────────────────────────────────
 
 model Address {
-  id             String  @id @default(uuid()) @db.Uuid
-  entityType     String  @db.VarChar(50)
-  entityId       String  @db.Uuid
+  id             String   @id @default(uuid()) @db.Uuid
+  entityType     String   @db.VarChar(50)
+  entityId       String?  @db.Uuid
+  retailerId     String?  @db.Uuid
+  distributorId  String?  @db.Uuid
   address1       String
   address2       String?
   city           String
   state          String
-  pincode        String  @db.VarChar(6)
-  createdBy      String? @db.Uuid
-  updatedBy      String? @db.Uuid
+  pincode        String   @db.VarChar(6)
+  createdBy      String?  @db.Uuid
+  updatedBy      String?  @db.Uuid
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  manufacturer   Manufacturer? @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  manufacturer Manufacturer? @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  retailer     Retailer?     @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  distributor Distributor?  @relation(fields: [distributorId], references: [id], onDelete: Cascade)
 
   @@index([entityType, entityId])
+  @@index([retailerId])
+  @@index([distributorId])
   @@map("addresses")
 }
 
 // ─── BankDetails ─────────────────────────────────────────────────────────────
 
 model BankDetails {
-  id            String   @id @default(uuid()) @db.Uuid
-  entityType    String   @db.VarChar(50)
-  entityId      String   @db.Uuid
-  accountName   String
-  accountNumber String
-  ifscCode      String   @db.VarChar(11)
-  bankName      String
-  createdBy     String?  @db.Uuid
-  updatedBy     String?  @db.Uuid
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(uuid()) @db.Uuid
+  entityType     String   @db.VarChar(50)
+  entityId       String?  @db.Uuid
+  retailerId     String?  @db.Uuid
+  distributorId  String?  @db.Uuid
+  accountName    String
+  accountNumber  String
+  ifscCode       String   @db.VarChar(11)
+  bankName       String
+  createdBy      String?  @db.Uuid
+  updatedBy      String?  @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  manufacturer  Manufacturer? @relation(fields: [entityId], references: [id], onDelete: Cascade)
-  documents     Document[]
+  manufacturer Manufacturer? @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  retailer     Retailer?     @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  distributor  Distributor?  @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  documents    Document[]
 
   @@index([entityType, entityId])
+  @@index([retailerId])
+  @@index([distributorId])
   @@map("bank_details")
 }
 
@@ -217,7 +358,9 @@ model BankDetails {
 
 model Director {
   id             String       @id @default(uuid()) @db.Uuid
-  manufacturerId String       @db.Uuid
+  manufacturerId String?      @db.Uuid
+  retailerId     String?      @db.Uuid
+  distributorId  String?      @db.Uuid
   userId         String       @db.Uuid
   type           DirectorType
   designation    String?      @db.VarChar(255)
@@ -230,12 +373,18 @@ model Director {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  retailer     Retailer?     @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  distributor Distributor?  @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   documents    Document[]
 
   @@unique([manufacturerId, userId])
+  @@unique([retailerId, userId])
+  @@unique([distributorId, userId])
   @@index([manufacturerId])
+  @@index([retailerId])
+  @@index([distributorId])
   @@index([userId])
   @@index([deletedAt])
   @@map("directors")
@@ -245,7 +394,9 @@ model Director {
 
 model AuthorizedPerson {
   id             String    @id @default(uuid()) @db.Uuid
-  manufacturerId String    @db.Uuid
+  manufacturerId String?   @db.Uuid
+  retailerId     String?   @db.Uuid
+  distributorId  String?   @db.Uuid
   userId         String    @db.Uuid
   aadhaarNumber  String?   @db.VarChar(12)
   createdBy      String?   @db.Uuid
@@ -255,12 +406,18 @@ model AuthorizedPerson {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  retailer     Retailer?     @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  distributor  Distributor?  @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   documents    Document[]
 
   @@unique([manufacturerId, userId])
+  @@unique([retailerId, userId])
+  @@unique([distributorId, userId])
   @@index([manufacturerId])
+  @@index([retailerId])
+  @@index([distributorId])
   @@index([userId])
   @@index([deletedAt])
   @@map("authorized_persons")
@@ -283,17 +440,23 @@ model Document {
   createdAt        DateTime  @default(now())
 
   // Polymorphic: entityType discriminates which parent owns this doc.
-  // Direct FK to manufacturer for Prisma relation support; other entity
-  // types are resolved at the application layer.
-  manufacturerId   String?   @db.Uuid
-  directorId       String?   @db.Uuid
-  authorizedPersonId String? @db.Uuid
-  bankDetailsId    String?   @db.Uuid
+  manufacturerId       String?   @db.Uuid
+  directorId           String?   @db.Uuid
+  authorizedPersonId   String?   @db.Uuid
+  bankDetailsId        String?   @db.Uuid
+  retailerId           String?   @db.Uuid
+  retailerLicenseId    String?   @db.Uuid
+  distributorId        String?   @db.Uuid
+  distributorLicenseId String?   @db.Uuid
 
-  manufacturer     Manufacturer?     @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
-  director         Director?         @relation(fields: [directorId], references: [id], onDelete: Cascade)
-  authorizedPerson AuthorizedPerson? @relation(fields: [authorizedPersonId], references: [id], onDelete: Cascade)
-  bankDetails      BankDetails?      @relation(fields: [bankDetailsId], references: [id], onDelete: Cascade)
+  manufacturer      Manufacturer?     @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  director          Director?         @relation(fields: [directorId], references: [id], onDelete: Cascade)
+  authorizedPerson  AuthorizedPerson? @relation(fields: [authorizedPersonId], references: [id], onDelete: Cascade)
+  bankDetails       BankDetails?      @relation(fields: [bankDetailsId], references: [id], onDelete: Cascade)
+  retailer          Retailer?         @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  retailerLicense   RetailerLicense?  @relation(fields: [retailerLicenseId], references: [id], onDelete: Cascade)
+  distributor       Distributor?      @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  distributorLicense DistributorLicense? @relation(fields: [distributorLicenseId], references: [id], onDelete: Cascade)
 
   @@index([entityType, entityId])
   @@index([deletedAt])

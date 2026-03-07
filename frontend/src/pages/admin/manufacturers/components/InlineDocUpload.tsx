@@ -15,6 +15,8 @@ interface InlineDocUploadProps {
   deleting?: boolean;
   accept?: string;
   multiple?: boolean;
+  /** Optional: for use outside manufacturer context (e.g. retailers). */
+  getDocumentUrl?: (filePath: string) => string;
 }
 
 export default function InlineDocUpload({
@@ -26,6 +28,7 @@ export default function InlineDocUpload({
   deleting = false,
   accept = ".pdf,.jpg,.jpeg,.png",
   multiple = false,
+  getDocumentUrl = manufacturersApi.getDocumentUrl,
 }: InlineDocUploadProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -52,7 +55,7 @@ export default function InlineDocUpload({
               <div className="ml-auto flex items-center gap-0.5 shrink-0">
                 <Button size="icon" variant="ghost" className="h-6 w-6" asChild>
                   <a
-                    href={manufacturersApi.getDocumentUrl(doc.filePath)}
+                    href={getDocumentUrl(doc.filePath)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

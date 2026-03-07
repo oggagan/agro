@@ -3,6 +3,7 @@ import type { CompanyType, DirectorType } from "@/types/manufacturer";
 export interface CompanyTypeConfig {
   showCompanyPan: boolean;
   showUdyogAadhaar: boolean;
+  showAuthorizedPerson: boolean;
   tabLabel: string;
   personLabel: string;
   directorType: DirectorType;
@@ -10,10 +11,14 @@ export interface CompanyTypeConfig {
   minPersons: number;
 }
 
+/** Company types allowed for retailers (no LIMITED). */
+export const RETAILER_COMPANY_TYPES: CompanyType[] = ["PROPRIETORSHIP", "PARTNERSHIP", "PVT_LTD"];
+
 export const COMPANY_TYPE_CONFIG: Record<CompanyType, CompanyTypeConfig> = {
   LIMITED: {
     showCompanyPan: true,
     showUdyogAadhaar: false,
+    showAuthorizedPerson: true,
     tabLabel: "Directors",
     personLabel: "Director",
     directorType: "DIRECTOR",
@@ -23,6 +28,7 @@ export const COMPANY_TYPE_CONFIG: Record<CompanyType, CompanyTypeConfig> = {
   PVT_LTD: {
     showCompanyPan: true,
     showUdyogAadhaar: false,
+    showAuthorizedPerson: true,
     tabLabel: "Directors",
     personLabel: "Director",
     directorType: "DIRECTOR",
@@ -32,6 +38,7 @@ export const COMPANY_TYPE_CONFIG: Record<CompanyType, CompanyTypeConfig> = {
   PARTNERSHIP: {
     showCompanyPan: true,
     showUdyogAadhaar: false,
+    showAuthorizedPerson: true,
     tabLabel: "Partners",
     personLabel: "Partner",
     directorType: "PARTNER",
@@ -41,6 +48,7 @@ export const COMPANY_TYPE_CONFIG: Record<CompanyType, CompanyTypeConfig> = {
   PROPRIETORSHIP: {
     showCompanyPan: false,
     showUdyogAadhaar: true,
+    showAuthorizedPerson: false,
     tabLabel: "Proprietor",
     personLabel: "Proprietor",
     directorType: "PROPRIETOR",

@@ -2,6 +2,8 @@ import { NavLink } from "react-router-dom";
 import {
   User,
   Factory,
+  Store,
+  Truck,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,8 @@ const mainItems = [
 
 const adminItems = [
   { icon: Factory, label: "Manufacturers", path: "/dashboard/admin/manufacturers" },
+  { icon: Store, label: "Retailers", path: "/dashboard/admin/retailers" },
+  { icon: Truck, label: "Distributors", path: "/dashboard/admin/distributors" },
 ];
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>

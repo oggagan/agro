@@ -72,6 +72,8 @@ export function useDeleteUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["manufacturers"] });
+      queryClient.invalidateQueries({ queryKey: ["retailers"] });
+      queryClient.invalidateQueries({ queryKey: ["distributors"] });
       toast.success("User deleted");
     },
     onError: (err: any) => toast.error(err?.response?.data?.error?.message || "Delete failed"),

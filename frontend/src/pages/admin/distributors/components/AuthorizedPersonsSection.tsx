@@ -1,39 +1,39 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { UserPlus, Pencil, FileUp, Trash2 } from "lucide-react";
 import AuthorizedPersonForm from "./AuthorizedPersonForm";
-import { useRemoveAuthorizedPerson } from "@/hooks/useManufacturers";
-import type { AuthorizedPerson } from "@/types/manufacturer";
+import { useRemoveDistributorAuthorizedPerson } from "@/hooks/useDistributors";
+import type { DistributorAuthorizedPerson } from "@/types/distributor";
 
 interface AuthorizedPersonsSectionProps {
-  manufacturerId: string;
-  authorizedPersons: AuthorizedPerson[];
+  distributorId: string;
+  authorizedPersons: DistributorAuthorizedPerson[];
 }
 
 export default function AuthorizedPersonsSection({
-  manufacturerId,
+  distributorId,
   authorizedPersons,
 }: AuthorizedPersonsSectionProps) {
-  const [selectedAp, setSelectedAp] = useState<AuthorizedPerson | null | undefined>(undefined);
+  const [selectedAp, setSelectedAp] = useState<DistributorAuthorizedPerson | null | undefined>(undefined);
   const [addMode, setAddMode] = useState(false);
-  const removeAp = useRemoveAuthorizedPerson();
+  const removeAp = useRemoveDistributorAuthorizedPerson();
 
   const showForm = addMode || selectedAp !== undefined;
   const formExisting = addMode ? null : selectedAp ?? null;
 
-  const displayName = (ap: AuthorizedPerson) =>
+  const displayName = (ap: DistributorAuthorizedPerson) =>
     ap.displayName ?? ap.user?.name ?? "—";
-  const displayPhone = (ap: AuthorizedPerson) =>
+  const displayPhone = (ap: DistributorAuthorizedPerson) =>
     ap.displayPhone ?? ap.user?.phones?.[0]?.number ?? "—";
-  const displayEmail = (ap: AuthorizedPerson) =>
+  const displayEmail = (ap: DistributorAuthorizedPerson) =>
     ap.displayEmail ?? ap.user?.emails?.[0]?.address ?? null;
 
-  const handleRemove = (ap: AuthorizedPerson) => {
+  const handleRemove = (ap: DistributorAuthorizedPerson) => {
     if (!confirm(`Remove ${displayName(ap)}?`)) return;
     removeAp.mutate(
-      { mfgId: manufacturerId, apId: ap.id },
+      { distributorId, apId: ap.id },
       { onSuccess: () => setSelectedAp(undefined) }
     );
   };
@@ -78,36 +78,22 @@ export default function AuthorizedPersonsSection({
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="h-8"
                       onClick={() => {
                         setSelectedAp(ap);
                         setAddMode(false);
                       }}
-                      className="gap-1"
                     >
                       <Pencil className="h-3 w-3" />
-                      Edit
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        setSelectedAp(ap);
-                        setAddMode(false);
-                      }}
-                      className="gap-1"
-                    >
-                      <FileUp className="h-3 w-3" />
-                      Documents
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                      className="h-8 text-destructive"
                       onClick={() => handleRemove(ap)}
                       disabled={removeAp.isPending}
-                      className="gap-1 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-3 w-3" />
-                      Remove
                     </Button>
                   </div>
                 </div>
@@ -117,42 +103,24 @@ export default function AuthorizedPersonsSection({
         </div>
       )}
 
-      {selectedAp && (
+      {showForm && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Edit authorized person</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedAp(undefined)}>
-              Close
-            </Button>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             <AuthorizedPersonForm
-              manufacturerId={manufacturerId}
-              apId={selectedAp.id}
-              existing={selectedAp}
-              onClose={() => setSelectedAp(undefined)}
+              distributorId={distributorId}
+              apId={formExisting?.id}
+              existing={formExisting}
+              onClose={() => {
+                setSelectedAp(undefined);
+                setAddMode(false);
+              }}
             />
           </CardContent>
         </Card>
       )}
 
-      {addMode && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add authorized person</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AuthorizedPersonForm
-              manufacturerId={manufacturerId}
-              existing={null}
-              onClose={() => setAddMode(false)}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {!showForm && authorizedPersons.length === 0 && (
-        <p className="text-muted-foreground text-sm">No authorized persons yet. Add one above.</p>
+      {authorizedPersons.length === 0 && !showForm && (
+        <p className="text-sm text-muted-foreground">No authorized persons. Add one above.</p>
       )}
     </div>
   );
