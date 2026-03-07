@@ -1,0 +1,345 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  SYSTEM
+  SUPER_ADMIN
+  MANUFACTURER
+  AUTHORIZED_PERSON
+  DIRECTOR
+}
+
+enum UserStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  INACTIVE
+  REJECTED
+}
+
+enum CompanyType {
+  LIMITED
+  PVT_LTD
+  PROPRIETORSHIP
+  PARTNERSHIP
+}
+
+enum DirectorType {
+  DIRECTOR
+  PARTNER
+  PROPRIETOR
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATUS_CHANGE
+  LOGIN
+  LOGOUT
+}
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  password  String?
+  role      Role
+  status    UserStatus @default(DRAFT)
+  createdBy String?    @db.Uuid
+  updatedBy String?    @db.Uuid
+  deletedAt DateTime?
+  deletedBy String?    @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  createdByUser User? @relation("UserCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User? @relation("UserUpdatedBy", fields: [updatedBy], references: [id])
+  deletedByUser User? @relation("UserDeletedBy", fields: [deletedBy], references: [id])
+
+  usersCreated User[] @relation("UserCreatedBy")
+  usersUpdated User[] @relation("UserUpdatedBy")
+  usersDeleted User[] @relation("UserDeletedBy")
+
+  phones             Phone[]
+  emails             Email[]
+  refreshTokens      RefreshToken[]
+  manufacturer       Manufacturer?
+  authorizedPersons  AuthorizedPerson[]
+  directors          Director[]
+  auditLogs          AuditLog[]
+  statusChanges      StatusHistory[]
+
+  @@index([role])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+// ─── Phone ───────────────────────────────────────────────────────────────────
+
+model Phone {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  number    String   @unique @db.VarChar(15)
+  isPrimary Boolean  @default(false)
+  label     String?  @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("phones")
+}
+
+// ─── Email ───────────────────────────────────────────────────────────────────
+
+model Email {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  address   String   @unique @db.VarChar(255)
+  isPrimary Boolean  @default(false)
+  label     String?  @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("emails")
+}
+
+// ─── RefreshToken ────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String
+  userId    String   @db.Uuid
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ─── Manufacturer ────────────────────────────────────────────────────────────
+
+model Manufacturer {
+  id                 String      @id @default(uuid()) @db.Uuid
+  userId             String      @unique @db.Uuid
+  companyName        String
+  companyType        CompanyType
+  licenseNumber      String?
+  licenseValidUpto   DateTime?
+  gstNumber          String?
+  udyogAadhaar       String?
+  companyPan         String?
+  canAddEditProducts Boolean     @default(false)
+  canManageBatch     Boolean     @default(false)
+  isDraft            Boolean     @default(false)
+  createdBy          String?     @db.Uuid
+  updatedBy          String?     @db.Uuid
+  deletedAt          DateTime?
+  deletedBy          String?     @db.Uuid
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addresses         Address[]
+  bankDetails       BankDetails[]
+  directors         Director[]
+  authorizedPersons AuthorizedPerson[]
+  documents         Document[]
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("manufacturers")
+}
+
+// ─── Address ─────────────────────────────────────────────────────────────────
+
+model Address {
+  id             String  @id @default(uuid()) @db.Uuid
+  entityType     String  @db.VarChar(50)
+  entityId       String  @db.Uuid
+  address1       String
+  address2       String?
+  city           String
+  state          String
+  pincode        String  @db.VarChar(6)
+  createdBy      String? @db.Uuid
+  updatedBy      String? @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  manufacturer   Manufacturer? @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@map("addresses")
+}
+
+// ─── BankDetails ─────────────────────────────────────────────────────────────
+
+model BankDetails {
+  id            String   @id @default(uuid()) @db.Uuid
+  entityType    String   @db.VarChar(50)
+  entityId      String   @db.Uuid
+  accountName   String
+  accountNumber String
+  ifscCode      String   @db.VarChar(11)
+  bankName      String
+  createdBy     String?  @db.Uuid
+  updatedBy     String?  @db.Uuid
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  manufacturer  Manufacturer? @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  documents     Document[]
+
+  @@index([entityType, entityId])
+  @@map("bank_details")
+}
+
+// ─── Director ────────────────────────────────────────────────────────────────
+
+model Director {
+  id             String       @id @default(uuid()) @db.Uuid
+  manufacturerId String       @db.Uuid
+  userId         String       @db.Uuid
+  type           DirectorType
+  designation    String?      @db.VarChar(255)
+  aadhaarNumber  String?      @db.VarChar(12)
+  panNumber      String?      @db.VarChar(10)
+  createdBy      String?      @db.Uuid
+  updatedBy      String?      @db.Uuid
+  deletedAt      DateTime?
+  deletedBy      String?      @db.Uuid
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents    Document[]
+
+  @@unique([manufacturerId, userId])
+  @@index([manufacturerId])
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("directors")
+}
+
+// ─── AuthorizedPerson ────────────────────────────────────────────────────────
+
+model AuthorizedPerson {
+  id             String    @id @default(uuid()) @db.Uuid
+  manufacturerId String    @db.Uuid
+  userId         String    @db.Uuid
+  aadhaarNumber  String?   @db.VarChar(12)
+  createdBy      String?   @db.Uuid
+  updatedBy      String?   @db.Uuid
+  deletedAt      DateTime?
+  deletedBy      String?   @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents    Document[]
+
+  @@unique([manufacturerId, userId])
+  @@index([manufacturerId])
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("authorized_persons")
+}
+
+// ─── Document ────────────────────────────────────────────────────────────────
+
+model Document {
+  id               String    @id @default(uuid()) @db.Uuid
+  entityType       String    @db.VarChar(50)
+  entityId         String    @db.Uuid
+  docType          String    @db.VarChar(50)
+  fileName         String
+  filePath         String
+  mimeType         String
+  fileSize         Int
+  uploadedBy       String?   @db.Uuid
+  deletedAt        DateTime?
+  deletedBy        String?   @db.Uuid
+  createdAt        DateTime  @default(now())
+
+  // Polymorphic: entityType discriminates which parent owns this doc.
+  // Direct FK to manufacturer for Prisma relation support; other entity
+  // types are resolved at the application layer.
+  manufacturerId   String?   @db.Uuid
+  directorId       String?   @db.Uuid
+  authorizedPersonId String? @db.Uuid
+  bankDetailsId    String?   @db.Uuid
+
+  manufacturer     Manufacturer?     @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  director         Director?         @relation(fields: [directorId], references: [id], onDelete: Cascade)
+  authorizedPerson AuthorizedPerson? @relation(fields: [authorizedPersonId], references: [id], onDelete: Cascade)
+  bankDetails      BankDetails?      @relation(fields: [bankDetailsId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([deletedAt])
+  @@map("documents")
+}
+
+// ─── AuditLog ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id              String      @id @default(uuid()) @db.Uuid
+  action          AuditAction
+  entityType      String      @db.VarChar(50)
+  entityId        String      @db.Uuid
+  performedBy     String      @db.Uuid
+  performedByRole String      @db.VarChar(20)
+  previousData    Json?
+  newData         Json?
+  ipAddress       String?     @db.VarChar(45)
+  userAgent       String?
+  createdAt       DateTime    @default(now())
+
+  performer User @relation(fields: [performedBy], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([performedBy])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── StatusHistory ───────────────────────────────────────────────────────────
+
+model StatusHistory {
+  id            String   @id @default(uuid()) @db.Uuid
+  entityType    String   @db.VarChar(50)
+  entityId      String   @db.Uuid
+  fromStatus    String?  @db.VarChar(20)
+  toStatus      String   @db.VarChar(20)
+  reason        String?
+  changedBy     String   @db.Uuid
+  changedByRole String   @db.VarChar(20)
+  createdAt     DateTime @default(now())
+
+  changer User @relation(fields: [changedBy], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([changedBy])
+  @@map("status_histories")
+}

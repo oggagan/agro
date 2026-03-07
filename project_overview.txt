@@ -1,0 +1,518 @@
+﻿Index
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Buchi Fin
+
+
+
+
+Retailers, Distributors & Manufacturing Units ( Used by GOVT. Employees to get the data )
+
+
+
+
+1. Login Page
+
+
+* User ID: A unique identifier for each user to sign in. ( Retailer, Distributor, Manufacturer, GOVT. ) Phone no. Otp verify
+* Password: A secure string of characters for authentication.
+
+
+2. Dashboard Main Page
+
+
+* Left-hand Side Menu: Contains all the main navigation options.
+* Header with Search Option: Allows users to search for specific data or products. Product search different criteria product name product number, serial number technical name, 
+* About Us: Provides information about the company and its services.
+* Contact: Displays contact information for support or inquiries. Email and phone number
+* Logout (Top Left): Allows users to log out of their accounts securely.
+* Main Area (Stats): Displays relevant statistics and information related to the user's account. Bar Graph/Pie Chart 
+
+
+3. Product Data manufacturer and admin panel active inactive decline reverify
+* Product Name: The common name of the product.
+* Technical Name: The technical or scientific name of the product.
+* Manufacturer Name: The name of the product's manufacturer.
+* Marketed By: The company responsible for marketing the product.
+* Product Registration Number: The product's unique registration number.
+* Product Size: The size of the product in liters or kilograms.
+* Batch Number (Editable): The product's batch number, which can be edited if necessary.
+* Product Description: A brief description of the product.
+* Product Antidote: Information about any antidotes or countermeasures for the product.
+* Product Images (2-4): A minimum of two and a maximum of four images of the product.
+* Who will create this?
+
+
+
+
+
+
+
+
+
+
+4. Menu Bar Options
+
+
+1. My Profile: Displays and allows editing of personal and firm details.
+2. Inventory: Allows users to manage their list of products.
+3. My Stock (Stock register): Provides an overview of the user's current stock levels.
+4. Manage Products: Enables users to edit product details and apply discounts.
+5. Receiving: Handles the receiving of purchased products and updates the inventory.
+6. Billing: Manages the billing and invoicing process. Billing or Transactions?
+7. GST Reports: Generates reports related to Goods and Services Tax (GST).
+8. All Reports: Allows users to view various reports, such as sales and purchase data.
+9. Advertisement Management: Retailer can advertise their product.
+-> Deals and Promotion: Retailers can post deals and promotions
+
+10. Market Place access (Online selling access): 
+-> Manage Orders
+-> Customer Review(Watch the customer reviews)
+
+11. Payment processing:
+12. Shipping and Delivery
+13. Returns and Refunds
+
+
+   1. My Profile
+   * Firm Name: The name of the user's company or organization.
+   * Firm Type (Retailer/Distributor): Indicates whether the user is a retailer or distributor.
+   * Owner's Name: The name of the business owner or proprietor.
+   * Owner's Address: The residential address of the business owner.
+   * Firm Address: The physical address of the business.
+   * Firm License Details: Provides information about the firm's license, including a PDF copy.
+   * Firm Authority Letter: Displays the authorization given by companies, editable by the user, with a PDF copy of the letter and validity dates.
+
+
+   2. Inventory
+   * Dropdown Menu (Authorized Companies): Allows users to select from their authorized companies.
+   * Product Selection: Displays the available products for the selected company, allowing users to choose the items they wish to add to their inventory.
+
+
+   3. My Stock
+   * Add/Edit Product Data: Allows users to add or edit new products.
+   * Remarks (Changes): Records any changes made to a product's details.
+   * Batch Number: The product's batch number.
+   * Quantity: The quantity of the product in stock.
+   * Save: Saves the current product data.
+   * Edit (Time Limitation): Allows users to edit product data within a specific time frame. (we can merge my stock and manage products in same)
+
+
+   4. Manage Products
+   * Product Rate (Selling Rate / Purchase Price): Allows users to set the selling and purchase prices for a product.
+   * GST: Sets the applicable Goods and Services Tax for the product.
+   * HSN Code: The product's Harmonized System Nomenclature code.
+   * Add Discount Offers: Enables users to apply discounts or special offers
+
+
+   5. Receiving Section
+   * Purchaser Information: Collects the name and address of the purchaser.
+   * Product Selection: Allows users to choose products from the inventory.
+   * Purchase Price: The price at which the user bought the products.
+   * Selling Price: The price at which the user intends to sell the products.
+
+
+   6. Billing Section
+   * There are 3 different tabs for billing
+(1. Seeds, 2. Pesticides, 3. Fertilizers)
+   * Date: The date of the transaction.
+   * Customer Information: Collects the customer's name, type (Farmer B2C, Retailer B2B), phone number, address, or Customer ID.
+   * Product Details: Displays the selected products, their sizes, prices, discounts, GST, HSN number, and batch number.
+   * Size: The size of the product in liters or kilograms.
+   * Price: The selling price of the product.
+   * Discount: Any applicable discounts or special offers.
+   * GST: The Goods and Services Tax applied to the product.
+   * HSN Number and Batch Number: The product's Harmonized System Nomenclature code and batch number.
+   * Print, Save, and Send: Allows users to print, save, or send the invoice.
+   * Payment Method: Cash, Online, Card, Udhari
+   * Transportation Details: If the Billing is B2B then transportation details are a must to record.
+
+
+      7. GST Reports
+      * Sales: Displays sales data with GST information.
+      * B2C Reports (Date Specific): Generates reports for B2C transactions within a specified time range.
+      * B2B Reports (Date Specific): Generates reports for B2B transactions within a specified time range.
+      * Receiving Bills Details: Shows the details of received bills.
+      * GST Payment Details: Provides information on GST payments.
+
+
+      8. Reports
+      * Sales: Displays sales data and allows users to filter by various criteria.
+      * Purchases: Displays purchase data and allow users to filter by various criteria.
+      * Filter Options: This enables users to filter reports based on specific criteria.
+      * What criteria will be there?
+
+
+      5. Logout
+      * Allows users to securely log out of their accounts.
+
+
+      6. Manufacturing Unit
+      * Create PRODUCT (Similar to Product Data): Manufacturing units have an additional feature that allows them to create an inventory of products. This includes fields such as product name, technical name, manufacturer name, marketed by, product registration number, product size, batch number (editable), product description, product antidote, and product images (minimum 2, maximum 4).
+
+
+      7. Government Employees
+      * Access to All Features: Government employees have access to all the features of the system.
+      * Additional Access to Reports Section (Without Financial Details): Government employees can access the reports section for every user but without financial data. This allows them to monitor and regulate businesses while maintaining privacy.
+
+
+
+
+
+
+
+
+
+
+Admin Panel
+
+
+Retailers Admin Panel Form ( To create a new ID)
+
+
+      1. Firm Details
+
+
+Firm name
+Firm address
+Firm Gst no
+Firm Gst documents
+Firm License No ( A firm can have multiple licenses no. for seeds, insecticide, and fertilizer and they all have different doc )
+Firm License doc
+Blocks static dropdown.
+
+
+      2. After filling in the firm details a dropdown menu to select the type of firm 
+A. Proprietorship
+B. Partnership
+C. Pvt. Limited
+
+
+A. Proprietor details
+
+
+Proprietor name
+Proprietor phone no 
+Proprietor email 
+Proprietor Adhar details + pdf or photo ( Front & Back )
+Proprietor pan details + pdf or photo ( Front )
+
+
+B. Partnership details
+
+
+Partnership firm ( Minimum 2 partners )
+Partners name 
+Partners designation 
+Partners phone number
+Partners email
+Partners adhar details + pdf or photo ( Front & Back )
+Partners pan details + pdf or photo ( Front )
+
+
+C. Pvt. Limited Details
+
+
+Directors name 
+Directors designation
+Directors Aadhaar details
+Company pan details
+Govt. registration certificate of the firm in pdf format 
+Authorized person/Manager name and phone number + Aadhaar details ( Optional )
+
+MD di declaration by company document upload
+
+Minimal 2 directors
+
+
+         3. Bank Details 
+
+
+Account Name
+Account No.
+IFSC code
+Bank Name
+Canceled check photo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Manufacturer Admin Panel Form ( To create a new ID)
+Note: The product can be edited or managed by only the manufacturer and admin panel but also we get requests from retailers in this proforma for which if a new product is added by the manufacturer then we get these proforma details.
+
+
+
+
+         1. Manufacturer Company Details
+
+
+Manufacturer Company name
+Manufacturer Company head office address
+Manufacturer Company License No 
+Manufacturer Company License doc 
+Manufacturer Company GST details + PDF
+Manufacturer Company Udyog Adhar + Docs
+
+
+         2. Manufacturer Type
+
+
+         1. Limited Company
+         2. Private Limited Company
+         3. Proprietorship Company
+         4. Partnership Company
+
+
+         1. Limited Company
+
+
+Directors name 
+Directors designation
+Directors Aadhaar details
+Company pan details
+Govt. registration certificate of the firm in pdf format 
+Authorized person/Manager(Person who signs principal certificate/Affidavit) name and phone number + Aadhaar details (Person to sign principal certificate/authority letter )
+
+Limited Company Details -> authorized person declaration needed, minimal 2 directors
+
+
+
+
+         2. Private Limited Company
+
+
+Directors name 
+Directors designation
+Directors Aadhaar details
+Company pan details
+Govt. registration certificate of the firm in pdf format 
+Authorized person/Manager(Person who signs principal certificate/Affidavit) name and phone number + Aadhaar details (Person to sign principal certificate/authority letter )
+Limited Company Details -> authorized person declaration needed, minimal 2 directors
+
+
+         3. Proprietorship Company
+
+
+Proprietor name
+Proprietor phone no 
+Proprietor email 
+Proprietor Adhar details + pdf or photo ( Front & Back )
+Proprietor pan details + pdf or photo ( Front )
+Authorized person/Manager(Person who signs principal certificate/Affidavit) name and phone number + Aadhaar details (Person to sign principal certificate/authority letter )
+
+
+Limited Company Details -> authorized person declaration needed, minimal 2 directors
+ 
+
+
+         4. Partnership Company
+
+
+Partnership firm ( Minimum 2 partners )
+Partners name 
+Partners designation 
+Partners phone number
+Partners email
+Partners adhar details + pdf or photo ( Front & Back )
+Partners pan details + pdf or photo ( Front )
+Authorized person/Manager(Person who signs principal certificate/Affidavit) name and phone number + Aadhaar details (Person to sign principal certificate/authority letter )
+
+
+
+
+
+
+         3. Bank Details
+
+
+Account Name
+Account No.
+IFSC code
+Bank Name
+Canceled check photo
+
+
+
+
+Manufacturer Rights/Authorities
+
+
+         1. Manufacturers can add products or they can add them to inventory( They have the right to edit details of their products on request)
+         2. He will only send the product to the market by batch number in respective with distributors. (manufacturer distributor will be allowed to add products batch number)
+         3. Manufacturers can request us to enable distributors to add and edit the batch size
+
+
+
+
+Distributor Admin Panel Form ( To create a new id )
+
+
+This panel will be merged with the manufacturer and retailers panel so if a retailer is also a distributor so he can add an authorized person to that panel to have access to billing, receiving, edit of the inventory that will be showcased on the retailers or manufacturer’s panel.
+
+
+Dropdown menu
+         1. State Distributor
+         2. Under Manufacturer Distributor
+         3. Under Retailer
+
+
+         1. State Distributor/Wholesaler
+
+
+Authorized Person Name 
+Phone Number
+Aadhaar Details 
+
+
+         2. Manufacturer Distributor
+
+
+License number 
+GST number
+Address
+Authorized person
+Phone number
+Aadhaar details
+
+
+
+
+
+
+Product Management Admin Panel
+
+
+Note: The product can be edited or managed by only the manufacturer and admin panel but also we get requests from retailers in this proforma for which if a new product is added by the manufacturer then we get these proforma details.
+
+
+Products Performa ( To Add New Product )
+
+
+
+
+Select the manufacturing company from the dropdown menu
+Product type ( Drop Down Menu )
+         1. Insect + Pesticide
+         2. Herbicide + Weedicide
+         3. Bacteriacide
+         4. Plant Growth Promoter, Regulator + Fertilizer
+
+
+Product Details we must have:-
+
+
+Product Name
+Technical Name
+Manufactured By
+Marketed By
+Product Photo ( Min 3 )
+Product Size
+Product Technical(Chemical) Registration Number (CIR No.)
+( Not required for retailer's performa )
+Product Description = Technical Description 
+Product Pamphlet PDF
+Product Antidote (Optional can be included in pamphlet also)
+Product recommended dose per acre and on which crops
+
+
+Note: We accept multiple products added from an Excel sheet with these details.
+
+
+
+
+
+
+Agronomist Admin Panel
+
+
+Note: Agronomists can be added by Companies, Retailers, Self, Govt Employees but cannot be deleted. To delete them they have to raise a request.
+
+
+Agronomists Details
+
+
+Name
+Address
+Phone Number
+Email-ID
+Employee Under ( DropDown )
+         * Company ( With Name )
+         * Retailer ( With Name )
+         * Self
+         * Govt Employees
+        All Bank Details
+        Qualification ( Supporting Document PDF )
