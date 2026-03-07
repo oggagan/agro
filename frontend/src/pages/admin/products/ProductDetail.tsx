@@ -1,0 +1,146 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProduct } from "@/hooks/useProducts";
+import type { ProductType } from "@/types/product";
+
+function formatProductType(t: string) {
+  return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export default function ProductDetail() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { data: product, isLoading } = useProduct(id);
+
+  if (isLoading || !product) {
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5 animate-fade-in">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/dashboard/admin/products")}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground truncate">{product.productName}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {product.technicalName} · {product.manufacturer?.companyName}
+          </p>
+        </div>
+        <Badge variant="outline" className="shrink-0">
+          {formatProductType(product.productType)}
+        </Badge>
+        <Badge variant="secondary" className="shrink-0">
+          {product.status}
+        </Badge>
+        <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/admin/products/edit/${product.id}`)}>
+          Edit
+        </Button>
+      </div>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            Basic Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Technical Name</p>
+              <p className="font-medium">{product.technicalName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">CIR Number</p>
+              <p className="font-medium">{product.cirNumber ?? "—"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Manufactured By</p>
+              <p className="font-medium">{product.manufacturedBy?.companyName ?? "—"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Marketed By</p>
+              <p className="font-medium">{product.marketedBy?.companyName ?? product.manufacturedBy?.companyName ?? "—"}</p>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Description</p>
+            <p className="text-sm mt-1 whitespace-pre-wrap">{product.description}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">Tax & Dosage</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">GST %</p>
+              <p className="font-medium">{product.gstPercentage}%</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">HSN Code</p>
+              <p className="font-medium">{product.hsnCode}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Recommended Dose</p>
+              <p className="font-medium">{product.recommendedDose} {product.doseUnit.replace("_", " ").toLowerCase()}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">Sizes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {product.sizes?.length ? (
+            <ul className="space-y-2">
+              {product.sizes.map((s) => (
+                <li key={s.id} className="flex items-center gap-2 text-sm">
+                  <span className="font-medium">{s.quantity} {s.unit}</span>
+                  <span className="text-muted-foreground">· {s.bottlesPerCase} per case</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No sizes defined.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">Recommended Crops</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {product.crops?.length ? (
+            <div className="flex flex-wrap gap-2">
+              {product.crops.map((c) => (
+                <Badge key={c.id} variant="secondary">
+                  {c.cropName}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No crops specified.</p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

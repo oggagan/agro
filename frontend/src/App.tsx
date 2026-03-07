@@ -13,6 +13,12 @@ import Retailers from "@/pages/admin/retailers/Retailers";
 import RetailerForm from "@/pages/admin/retailers/RetailerForm";
 import Distributors from "@/pages/admin/distributors/Distributors";
 import DistributorForm from "@/pages/admin/distributors/DistributorForm";
+import Products from "@/pages/admin/products/Products";
+import ProductForm from "@/pages/admin/products/ProductForm";
+import ProductDetail from "@/pages/admin/products/ProductDetail";
+import Inventories from "@/pages/admin/inventory/Inventories";
+import InventoryForm from "@/pages/admin/inventory/InventoryForm";
+import InventoryProducts from "@/pages/admin/inventory/InventoryProducts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +59,14 @@ function AppRoutes() {
         <Route path="admin/distributors" element={<Distributors />} />
         <Route path="admin/distributors/add" element={<DistributorForm />} />
         <Route path="admin/distributors/edit/:id" element={<DistributorForm />} />
+        <Route path="admin/products" element={<Products />} />
+        <Route path="admin/products/add" element={<ProductForm />} />
+        <Route path="admin/products/edit/:id" element={<ProductForm />} />
+        <Route path="admin/products/:id" element={<ProductDetail />} />
+        <Route path="admin/inventory" element={<Inventories />} />
+        <Route path="admin/inventory/add" element={<InventoryForm />} />
+        <Route path="admin/inventory/edit/:id" element={<InventoryForm />} />
+        <Route path="admin/inventory/:id/products" element={<InventoryProducts />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

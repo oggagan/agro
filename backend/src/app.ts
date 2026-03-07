@@ -12,6 +12,8 @@ import userRoutes from './modules/user/user.routes.js';
 import manufacturerRoutes from './modules/manufacturer/manufacturer.routes.js';
 import retailerRoutes from './modules/retailer/retailer.routes.js';
 import distributorRoutes from './modules/distributor/distributor.routes.js';
+import productRoutes from './modules/product/product.routes.js';
+import inventoryRoutes from './modules/inventory/inventory.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,6 +75,8 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/manufacturers', manufacturerRoutes);
 app.use('/api/v1/retailers', retailerRoutes);
 app.use('/api/v1/distributors', distributorRoutes);
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/inventories', inventoryRoutes);
 
 // ─── Error handling ──────────────────────────────────────────────────────────
 

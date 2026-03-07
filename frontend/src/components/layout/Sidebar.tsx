@@ -4,6 +4,8 @@ import {
   Factory,
   Store,
   Truck,
+  Package,
+  Warehouse,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,8 @@ const adminItems = [
   { icon: Factory, label: "Manufacturers", path: "/dashboard/admin/manufacturers" },
   { icon: Store, label: "Retailers", path: "/dashboard/admin/retailers" },
   { icon: Truck, label: "Distributors", path: "/dashboard/admin/distributors" },
+  { icon: Package, label: "Products", path: "/dashboard/admin/products" },
+  { icon: Warehouse, label: "Inventory", path: "/dashboard/admin/inventory" },
 ];
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
