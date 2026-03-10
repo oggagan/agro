@@ -220,6 +220,13 @@ export default function DistributorForm() {
               {distributor.companyName || distributor.user?.name} · {distributor.distributorType.replace(/_/g, " ")}
             </p>
           )}
+          {isEdit && distributor && (distributor.createdByUser || distributor.createdAt) && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {distributor.createdByUser && `Created by ${distributor.createdByUser.name}`}
+              {distributor.createdByUser && distributor.createdAt && " · "}
+              {distributor.createdAt && `Created ${new Date(distributor.createdAt).toLocaleDateString()}`}
+            </p>
+          )}
         </div>
       </div>
 

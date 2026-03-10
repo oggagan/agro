@@ -69,24 +69,6 @@ export default function DirectorsSection({ manufacturerId, directors, companyTyp
         )}
       </CardHeader>
       <CardContent className="space-y-3 px-5 pb-5 pt-0">
-        {directors.map((dir, idx) => (
-          <DirectorRow
-            key={dir.id}
-            director={dir}
-            index={idx}
-            manufacturerId={manufacturerId}
-            personLabel={config.personLabel}
-            onUpdate={updateDirector}
-            onDelete={deleteDirector}
-          />
-        ))}
-
-        {directors.length === 0 && !showNew && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No {config.tabLabel.toLowerCase()} added yet
-          </p>
-        )}
-
         {showNew && (
           <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
             <h4 className="text-sm font-medium">New {config.personLabel}</h4>
@@ -153,6 +135,24 @@ export default function DirectorsSection({ manufacturerId, directors, companyTyp
               </Button>
             </div>
           </div>
+        )}
+
+        {directors.map((dir, idx) => (
+          <DirectorRow
+            key={dir.id}
+            director={dir}
+            index={idx}
+            manufacturerId={manufacturerId}
+            personLabel={config.personLabel}
+            onUpdate={updateDirector}
+            onDelete={deleteDirector}
+          />
+        ))}
+
+        {directors.length === 0 && !showNew && (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No {config.tabLabel.toLowerCase()} added yet
+          </p>
         )}
       </CardContent>
     </Card>

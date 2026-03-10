@@ -77,6 +77,7 @@ export interface Manufacturer {
   companyType: CompanyType;
   licenseNumber?: string;
   licenseValidUpto?: string;
+  registrationNumber?: string;
   gstNumber?: string;
   udyogAadhaar?: string;
   companyPan?: string;
@@ -94,6 +95,7 @@ export interface Manufacturer {
     phones?: { number: string; isPrimary?: boolean }[];
     emails?: { address: string; isPrimary?: boolean }[];
   };
+  createdByUser?: { id: string; name: string } | null;
   addresses: Address[];
   directors: Director[];
   authorizedPersons: AuthorizedPerson[];
@@ -114,6 +116,7 @@ export interface CreateManufacturerPayload {
   companyType: CompanyType;
   licenseNumber?: string;
   licenseValidUpto?: string;
+  registrationNumber?: string;
   gstNumber?: string;
   udyogAadhaar?: string;
   companyPan?: string;
@@ -157,6 +160,7 @@ export interface UpdateManufacturerPayload {
   companyType?: CompanyType;
   licenseNumber?: string;
   licenseValidUpto?: string;
+  registrationNumber?: string;
   gstNumber?: string;
   udyogAadhaar?: string;
   companyPan?: string;

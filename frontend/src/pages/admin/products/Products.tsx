@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useProductList, useDeleteProduct } from "@/hooks/useProducts";
+import { useProductList, useDeleteProduct, useUpdateProductStatus } from "@/hooks/useProducts";
 import { useManufacturerList } from "@/hooks/useManufacturers";
 import type { Product, ProductStatus, ProductType } from "@/types/product";
 
@@ -71,6 +71,13 @@ export default function Products() {
   const { data: response, isLoading } = useProductList(queryParams);
   const { data: manufacturersResponse } = useManufacturerList({ limit: 500 });
   const deleteProduct = useDeleteProduct();
+  const updateStatus = useUpdateProductStatus();
+
+  const handleStatusToggle = (p: Product) => {
+    if (p.status !== "ACTIVE" && p.status !== "INACTIVE") return;
+    const newStatus: ProductStatus = p.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    updateStatus.mutate({ id: p.id, status: newStatus });
+  };
 
   const products: Product[] = response?.data ?? [];
   const meta = response?.meta;
@@ -231,9 +238,14 @@ export default function Products() {
                         <TableCell className="py-3">
                           <Badge
                             variant="outline"
-                            className={`text-xs font-medium ${statusStyles[p.status] ?? "bg-muted/80 text-muted-foreground"}`}
+                            className={`text-xs font-medium ${(p.status === "ACTIVE" || p.status === "INACTIVE") ? "cursor-pointer" : ""} ${statusStyles[p.status] ?? "bg-muted/80 text-muted-foreground"}`}
+                            onClick={() => handleStatusToggle(p)}
                           >
-                            {p.status}
+                            {(p.status === "ACTIVE" || p.status === "INACTIVE") && updateStatus.isPending ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              p.status
+                            )}
                           </Badge>
                         </TableCell>
                         <TableCell className="py-3 text-right">

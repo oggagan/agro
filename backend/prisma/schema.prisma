@@ -139,6 +139,9 @@ model User {
   usersCreated User[] @relation("UserCreatedBy")
   usersUpdated User[] @relation("UserUpdatedBy")
   usersDeleted User[] @relation("UserDeletedBy")
+  manufacturersCreated Manufacturer[] @relation("ManufacturerCreatedBy")
+  retailersCreated Retailer[] @relation("RetailerCreatedBy")
+  distributorsCreated Distributor[] @relation("DistributorCreatedBy")
 
   phones             Phone[]
   emails             Email[]
@@ -218,7 +221,8 @@ model Manufacturer {
   licenseValidUpto   DateTime?
   gstNumber          String?
   udyogAadhaar       String?
-  companyPan         String?
+  companyPan             String?
+  registrationNumber     String?
   canAddEditProducts Boolean     @default(false)
   canManageBatch     Boolean     @default(false)
   isDraft            Boolean     @default(false)
@@ -230,6 +234,7 @@ model Manufacturer {
   updatedAt          DateTime    @updatedAt
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdByUser     User?              @relation("ManufacturerCreatedBy", fields: [createdBy], references: [id])
   addresses         Address[]
   bankDetails       BankDetails[]
   directors         Director[]
@@ -264,6 +269,7 @@ model Retailer {
   updatedAt      DateTime    @updatedAt
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdByUser     User?              @relation("RetailerCreatedBy", fields: [createdBy], references: [id])
   addresses         Address[]
   bankDetails       BankDetails[]
   licenses          RetailerLicense[]
@@ -322,6 +328,7 @@ model Distributor {
   updatedAt        DateTime        @updatedAt
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdByUser     User?              @relation("DistributorCreatedBy", fields: [createdBy], references: [id])
   manufacturer      Manufacturer?      @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
   retailer          Retailer?          @relation(fields: [retailerId], references: [id], onDelete: Cascade)
   addresses         Address[]
@@ -583,12 +590,13 @@ model Product {
   technicalName     String
   manufacturedById  String        @db.Uuid
   marketedById      String?       @db.Uuid
-  description       String        @db.Text
+  description       String?       @db.Text
   cirNumber         String?
   gstPercentage     Decimal       @db.Decimal(5, 2)
   hsnCode           String
   recommendedDose   String
   doseUnit          DoseUnit
+  dosePerLiter      String?
   status            ProductStatus @default(DRAFT)
   isDraft           Boolean       @default(false)
   createdBy         String?       @db.Uuid

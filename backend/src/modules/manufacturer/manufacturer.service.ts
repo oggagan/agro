@@ -4,6 +4,7 @@ import { AppError } from '../../middleware/error.middleware.js';
 import { createAuditLog, createStatusHistory } from '../../utils/audit.js';
 import { notDeleted, softDeleteData } from '../../utils/soft-delete.js';
 import { getPaginationParams, buildPaginationMeta } from '../../utils/pagination.js';
+import * as inventoryService from '../inventory/inventory.service.js';
 
 const manufacturerInclude = {
   user: {
@@ -16,6 +17,9 @@ const manufacturerInclude = {
       phones: true,
       emails: true,
     },
+  },
+  createdByUser: {
+    select: { id: true, name: true },
   },
   addresses: true,
   bankDetails: { include: { documents: { where: { deletedAt: null } } } },
@@ -131,6 +135,7 @@ export async function createManufacturer(
         gstNumber: data.gstNumber || null,
         udyogAadhaar: data.udyogAadhaar || null,
         companyPan: data.companyPan || null,
+        registrationNumber: data.registrationNumber || null,
         isDraft: data.isDraft || false,
         createdBy: performedBy,
       },
@@ -263,7 +268,30 @@ export async function createManufacturer(
     include: manufacturerInclude,
   });
 
-  return full;
+  try {
+    const addr = full?.addresses?.[0];
+    await inventoryService.createInventory(
+      {
+        ownerType: 'MANUFACTURER',
+        manufacturerId: full!.id,
+        name: `${full!.companyName} Inventory`,
+        type: 'WAREHOUSE',
+        address1: addr?.address1 ?? 'To be updated',
+        address2: addr?.address2 ?? null,
+        city: addr?.city ?? 'To be updated',
+        state: addr?.state ?? 'To be updated',
+        pincode: addr?.pincode ?? '000000',
+      },
+      performedBy,
+      performedByRole,
+      ip,
+      userAgent,
+    );
+  } catch (_err) {
+    // Do not block manufacturer creation if auto-inventory fails
+  }
+
+  return full!;
 }
 
 // ─── Admin: List manufacturers ───────────────────────────────────────────────

@@ -4,6 +4,7 @@ import { AppError } from '../../middleware/error.middleware.js';
 import { createAuditLog, createStatusHistory } from '../../utils/audit.js';
 import { notDeleted, softDeleteData } from '../../utils/soft-delete.js';
 import { getPaginationParams, buildPaginationMeta } from '../../utils/pagination.js';
+import * as inventoryService from '../inventory/inventory.service.js';
 
 const retailerInclude = {
   user: {
@@ -16,6 +17,9 @@ const retailerInclude = {
       phones: true,
       emails: true,
     },
+  },
+  createdByUser: {
+    select: { id: true, name: true },
   },
   addresses: true,
   bankDetails: { include: { documents: { where: { deletedAt: null } } } },
@@ -288,7 +292,30 @@ export async function createRetailer(
     include: retailerInclude,
   });
 
-  return full;
+  try {
+    const addr = full?.addresses?.[0];
+    await inventoryService.createInventory(
+      {
+        ownerType: 'RETAILER',
+        retailerId: full!.id,
+        name: `${full!.companyName} Inventory`,
+        type: 'SHOP',
+        address1: addr?.address1 ?? 'To be updated',
+        address2: addr?.address2 ?? null,
+        city: addr?.city ?? 'To be updated',
+        state: addr?.state ?? 'To be updated',
+        pincode: addr?.pincode ?? '000000',
+      },
+      performedBy,
+      performedByRole,
+      ip,
+      userAgent,
+    );
+  } catch (_err) {
+    // Do not block retailer creation if auto-inventory fails
+  }
+
+  return full!;
 }
 
 // ─── Admin: List retailers ───────────────────────────────────────────────────

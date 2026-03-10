@@ -15,7 +15,7 @@ import {
 
 const retailerLicenseSchema = z.object({
   category: z.enum(['SEEDS', 'INSECTICIDE', 'FERTILIZER']),
-  licenseNumber: z.string().optional(),
+  licenseNumber: z.string().min(1, 'License number is required'),
   validUptoDate: z.string().optional(),
 });
 
@@ -67,12 +67,12 @@ export const listRetailersQuerySchema = z.object({
 
 export const createRetailerLicenseSchema = z.object({
   category: z.enum(['SEEDS', 'INSECTICIDE', 'FERTILIZER']),
-  licenseNumber: z.string().optional(),
+  licenseNumber: z.string().min(1, 'License number is required'),
   validUptoDate: z.string().optional(),
 });
 
 export const updateRetailerLicenseSchema = z.object({
-  licenseNumber: z.string().optional(),
+  licenseNumber: z.string().min(1, 'License number is required').optional(),
   validUptoDate: z.string().optional(),
 });
 

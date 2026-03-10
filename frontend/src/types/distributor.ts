@@ -58,6 +58,7 @@ export interface Distributor {
     phones?: { number: string; isPrimary?: boolean }[];
     emails?: { address: string; isPrimary?: boolean }[];
   };
+  createdByUser?: { id: string; name: string } | null;
   manufacturer?: { id: string; companyName: string } | null;
   retailer?: { id: string; companyName: string } | null;
   addresses: Address[];

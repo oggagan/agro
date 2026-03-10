@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProduct } from "@/hooks/useProducts";
+import { useProduct, useUpdateProductStatus } from "@/hooks/useProducts";
 import { productsApi } from "@/api/products.api";
-import type { ProductType } from "@/types/product";
+import type { ProductType, ProductStatus } from "@/types/product";
+import { Loader2 } from "lucide-react";
 
 function formatProductType(t: string) {
   return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -16,6 +17,14 @@ export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: product, isLoading } = useProduct(id);
+  const updateStatus = useUpdateProductStatus();
+
+  const canToggleStatus = product?.status === "ACTIVE" || product?.status === "INACTIVE";
+  const handleStatusToggle = () => {
+    if (!product || !canToggleStatus) return;
+    const newStatus: ProductStatus = product.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    updateStatus.mutate({ id: product.id, status: newStatus });
+  };
 
   if (isLoading || !product) {
     return (
@@ -44,6 +53,12 @@ export default function ProductDetail() {
         <Badge variant="secondary" className="shrink-0">
           {product.status}
         </Badge>
+        {canToggleStatus && (
+          <Button variant="outline" size="sm" onClick={handleStatusToggle} disabled={updateStatus.isPending}>
+            {updateStatus.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+            {product.status === "ACTIVE" ? "Deactivate" : "Activate"}
+          </Button>
+        )}
         <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/admin/products/edit/${product.id}`)}>
           Edit
         </Button>
@@ -53,7 +68,7 @@ export default function ProductDetail() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Basic Details
+            Product Details
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -77,7 +92,7 @@ export default function ProductDetail() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Description</p>
-            <p className="text-sm mt-1 whitespace-pre-wrap">{product.description}</p>
+            <p className="text-sm mt-1 whitespace-pre-wrap">{product.description ?? "—"}</p>
           </div>
         </CardContent>
       </Card>
@@ -157,7 +172,7 @@ export default function ProductDetail() {
 
       <Card className="border-0 shadow-md bg-card">
         <CardHeader>
-          <CardTitle className="text-base">Tax & Dosage</CardTitle>
+          <CardTitle className="text-base">Tax Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -169,10 +184,26 @@ export default function ProductDetail() {
               <p className="text-sm text-muted-foreground">HSN Code</p>
               <p className="font-medium">{product.hsnCode}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">Dosage</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Recommended Dose</p>
               <p className="font-medium">{product.recommendedDose} {product.doseUnit.replace("_", " ").toLowerCase()}</p>
             </div>
+            {product.dosePerLiter != null && product.dosePerLiter !== "" && (
+              <div>
+                <p className="text-sm text-muted-foreground">Dose per Liter</p>
+                <p className="font-medium">{product.dosePerLiter}</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

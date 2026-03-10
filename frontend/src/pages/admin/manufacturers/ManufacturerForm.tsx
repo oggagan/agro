@@ -48,6 +48,7 @@ export default function ManufacturerForm() {
     udyogAadhaar: "",
     licenseNumber: "",
     licenseValidUpto: "",
+    registrationNumber: "",
     address1: "",
     address2: "",
     city: "",
@@ -66,6 +67,7 @@ export default function ManufacturerForm() {
       udyogAadhaar: manufacturer.udyogAadhaar || "",
       licenseNumber: manufacturer.licenseNumber || "",
       licenseValidUpto: manufacturer.licenseValidUpto ? manufacturer.licenseValidUpto.slice(0, 10) : "",
+      registrationNumber: manufacturer.registrationNumber || "",
       address1: addr?.address1 || "",
       address2: addr?.address2 || "",
       city: addr?.city || "",
@@ -103,6 +105,7 @@ export default function ManufacturerForm() {
         udyogAadhaar: companyForm.udyogAadhaar || undefined,
         licenseNumber: companyForm.licenseNumber || undefined,
         licenseValidUpto: companyForm.licenseValidUpto || undefined,
+        registrationNumber: companyForm.registrationNumber || undefined,
         address: companyForm.address1 ? {
           address1: companyForm.address1,
           address2: companyForm.address2 || undefined,
@@ -138,6 +141,7 @@ export default function ManufacturerForm() {
           udyogAadhaar: companyForm.udyogAadhaar || undefined,
           licenseNumber: companyForm.licenseNumber || undefined,
           licenseValidUpto: companyForm.licenseValidUpto || undefined,
+          registrationNumber: companyForm.registrationNumber || undefined,
           address: companyForm.address1 ? {
             address1: companyForm.address1,
             address2: companyForm.address2 || undefined,
@@ -172,6 +176,13 @@ export default function ManufacturerForm() {
           </h1>
           {isEdit && manufacturer?.companyName && (
             <p className="text-sm text-muted-foreground mt-0.5">{manufacturer.companyName}</p>
+          )}
+          {isEdit && (manufacturer?.createdByUser || manufacturer?.createdAt) && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {manufacturer.createdByUser && `Created by ${manufacturer.createdByUser.name}`}
+              {manufacturer.createdByUser && manufacturer.createdAt && " · "}
+              {manufacturer.createdAt && `Created ${new Date(manufacturer.createdAt).toLocaleDateString()}`}
+            </p>
           )}
         </div>
       </div>

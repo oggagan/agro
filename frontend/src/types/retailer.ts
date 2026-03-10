@@ -50,6 +50,7 @@ export interface Retailer {
     phones?: { number: string; isPrimary?: boolean }[];
     emails?: { address: string; isPrimary?: boolean }[];
   };
+  createdByUser?: { id: string; name: string } | null;
   addresses: Address[];
   directors: RetailerDirector[];
   authorizedPersons: RetailerAuthorizedPerson[];

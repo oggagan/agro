@@ -240,8 +240,8 @@ export function useUploadDocuments() {
       docType: string;
     }) =>
       manufacturersApi.uploadDocuments(mfgId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
       toast.success("Documents uploaded");
     },
     onError: (err: any) => toast.error(err?.response?.data?.error?.message || "Failed to upload documents"),
@@ -254,8 +254,8 @@ export function useDeleteDocument() {
   return useMutation({
     mutationFn: ({ mfgId, docId }: { mfgId: string; docId: string }) =>
       manufacturersApi.deleteDocument(mfgId, docId),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
       toast.success("Document deleted");
     },
     onError: (err: any) => toast.error(err?.response?.data?.error?.message || "Failed to delete document"),
@@ -273,8 +273,8 @@ export function useUploadDirectorDocuments() {
       docType: string;
     }) =>
       manufacturersApi.uploadDirectorDocuments(mfgId, dirId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
       toast.success("Director document uploaded");
     },
     onError: (err: any) => toast.error(err?.response?.data?.error?.message || "Failed to upload director document"),
@@ -292,8 +292,8 @@ export function useUploadAuthorizedPersonDocuments() {
       docType: string;
     }) =>
       manufacturersApi.uploadAuthorizedPersonDocuments(mfgId, apId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
       toast.success("Authorized person document uploaded");
     },
     onError: (err: any) => toast.error(err?.response?.data?.error?.message || "Failed to upload document"),
@@ -310,8 +310,8 @@ export function useUploadBankDetailsDocuments() {
       docType: string;
     }) =>
       manufacturersApi.uploadBankDetailsDocuments(mfgId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["manufacturer", vars.mfgId] });
       toast.success("Bank details document uploaded");
     },
     onError: (err: any) => toast.error(err?.response?.data?.error?.message || "Failed to upload document"),

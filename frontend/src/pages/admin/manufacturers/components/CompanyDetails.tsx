@@ -15,6 +15,7 @@ interface CompanyDetailsProps {
     udyogAadhaar: string;
     licenseNumber: string;
     licenseValidUpto: string;
+    registrationNumber: string;
     address1: string;
     address2: string;
     city: string;
@@ -212,7 +213,20 @@ export default function CompanyDetails({
 
         {isEdit && onUploadDoc && onDeleteDoc && (
           <div className="space-y-3 border-t pt-4">
-            <h4 className="text-sm font-medium text-muted-foreground">Govt registration</h4>
+            <h4 className="text-sm font-medium text-muted-foreground">Company Registration</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="registrationNumber" className="text-muted-foreground font-normal text-sm">Registration Number</Label>
+                <Input
+                  id="registrationNumber"
+                  value={values.registrationNumber}
+                  onChange={(e) => onChange("registrationNumber", e.target.value)}
+                  placeholder="Registration number"
+                  disabled={disabled}
+                  className="h-10"
+                />
+              </div>
+            </div>
             <InlineDocUpload
               label="Certificate"
               documents={filterDocs(documents, "govt_registration")}

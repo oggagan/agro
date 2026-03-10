@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Plus, Save } from "lucide-react";
+import { toast } from "sonner";
 import {
   useAddRetailerLicense,
   useUpdateRetailerLicense,
@@ -41,20 +42,29 @@ export default function LicensesSection({ retailerId, licenses }: LicensesSectio
   const canAdd = existingCategories.length < 3;
 
   const handleSaveEdit = (licId: string) => {
+    if (!editForm.licenseNumber.trim()) {
+      toast.error("License number is required");
+      return;
+    }
     updateLicense.mutate(
-      { retailerId, licId, payload: editForm },
+      { retailerId, licId, payload: { ...editForm, licenseNumber: editForm.licenseNumber.trim() } },
       { onSuccess: () => setEditingLicId(null) }
     );
   };
 
   const handleAdd = () => {
     if (!newCategory) return;
+    const trimmed = (newForm.licenseNumber || "").trim();
+    if (!trimmed) {
+      toast.error("License number is required");
+      return;
+    }
     addLicense.mutate(
       {
         retailerId,
         payload: {
           category: newCategory,
-          licenseNumber: newForm.licenseNumber || undefined,
+          licenseNumber: trimmed,
           validUptoDate: newForm.validUptoDate || undefined,
         },
       },
@@ -90,11 +100,11 @@ export default function LicensesSection({ retailerId, licenses }: LicensesSectio
             {editingLicId === lic.id ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">License number</Label>
+                  <Label className="text-xs">License number *</Label>
                   <Input
                     value={editForm.licenseNumber}
                     onChange={(e) => setEditForm((p) => ({ ...p, licenseNumber: e.target.value }))}
-                    placeholder="License number"
+                    placeholder="License number *"
                     className="h-9"
                   />
                 </div>
@@ -112,7 +122,7 @@ export default function LicensesSection({ retailerId, licenses }: LicensesSectio
                     size="sm"
                     className="h-9"
                     onClick={() => handleSaveEdit(lic.id)}
-                    disabled={updateLicense.isPending}
+                    disabled={updateLicense.isPending || !editForm.licenseNumber.trim()}
                   >
                     {updateLicense.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                     Save
@@ -165,11 +175,11 @@ export default function LicensesSection({ retailerId, licenses }: LicensesSectio
                 </select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">License number</Label>
+                <Label className="text-xs">License number *</Label>
                 <Input
                   value={newForm.licenseNumber}
                   onChange={(e) => setNewForm((p) => ({ ...p, licenseNumber: e.target.value }))}
-                  placeholder="Optional"
+                  placeholder="License number *"
                   className="h-9"
                 />
               </div>
@@ -188,7 +198,7 @@ export default function LicensesSection({ retailerId, licenses }: LicensesSectio
               variant="outline"
               className="h-9"
               onClick={handleAdd}
-              disabled={!newCategory || addLicense.isPending}
+              disabled={!newCategory || !newForm.licenseNumber.trim() || addLicense.isPending}
             >
               {addLicense.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
               Add license

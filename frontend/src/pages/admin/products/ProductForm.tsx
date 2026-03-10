@@ -51,6 +51,8 @@ export default function ProductForm() {
   const [hsnCode, setHsnCode] = useState("");
   const [recommendedDose, setRecommendedDose] = useState("");
   const [doseUnit, setDoseUnit] = useState<DoseUnit>("PER_ACRE");
+  const [dosePerLiter, setDosePerLiter] = useState("");
+  const [marketedByDifferent, setMarketedByDifferent] = useState(false);
   const [sizes, setSizes] = useState<{ quantity: string; unit: string; bottlesPerCase: number }[]>([emptySize()]);
   const [crops, setCrops] = useState<{ cropName: string; isCustom: boolean }[]>([]);
   const [customCrop, setCustomCrop] = useState("");
@@ -61,7 +63,16 @@ export default function ProductForm() {
   const [antidoteFile, setAntidoteFile] = useState<File | null>(null);
   const [sizePackagingFiles, setSizePackagingFiles] = useState<File[][]>([[]]);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const clearError = (field: string) => {
+    setErrors((e) => {
+      const next = { ...e };
+      delete next[field];
+      return next;
+    });
+  };
 
   const manufacturers = manufacturersRes?.data ?? [];
 
@@ -84,6 +95,8 @@ export default function ProductForm() {
       setHsnCode(product.hsnCode);
       setRecommendedDose(product.recommendedDose);
       setDoseUnit(product.doseUnit);
+      setDosePerLiter(product.dosePerLiter ?? "");
+      setMarketedByDifferent(!!(product.marketedById && product.marketedById !== product.manufacturedById));
       setSizes(
         product.sizes?.length
           ? product.sizes.map((s) => ({
@@ -102,9 +115,13 @@ export default function ProductForm() {
   useEffect(() => {
     if (!isEdit && manufacturerId) {
       setManufacturedById(manufacturerId);
-      setMarketedById(manufacturerId);
+      if (!marketedByDifferent) setMarketedById(manufacturerId);
     }
-  }, [manufacturerId, isEdit]);
+  }, [manufacturerId, isEdit, marketedByDifferent]);
+
+  useEffect(() => {
+    if (!marketedByDifferent) setMarketedById(manufacturedById);
+  }, [marketedByDifferent, manufacturedById]);
 
   const addSize = () => {
     setSizes((s) => [...s, emptySize()]);
@@ -137,13 +154,14 @@ export default function ProductForm() {
     productName: productName.trim(),
     technicalName: technicalName.trim(),
     manufacturedById: manufacturedById || mfrId,
-    marketedById: marketedById || mfrId,
-    description: description.trim(),
+    marketedById: marketedByDifferent ? (marketedById || mfrId) : (manufacturedById || mfrId),
+    description: description.trim() || undefined,
     cirNumber: cirNumber.trim() || undefined,
     gstPercentage,
     hsnCode: hsnCode.trim(),
     recommendedDose: recommendedDose.trim(),
     doseUnit,
+    dosePerLiter: dosePerLiter.trim() || undefined,
     sizes: sizes.map((s) => ({
       quantity: String(s.quantity).trim(),
       unit: s.unit,
@@ -154,77 +172,46 @@ export default function ProductForm() {
   });
 
   const handleSubmit = async (isDraft: boolean) => {
+    setErrors({});
     if (!isDraft) {
+      const next: Record<string, string> = {};
       if (!manufacturerId) {
-        toast.error("Please select a manufacturing company");
-        return;
+        next.manufacturerId = "Please select a manufacturing company";
       }
-      if (!productType) {
-        toast.error("Please select product type");
-        return;
-      }
-      if (!productName.trim() || !technicalName.trim()) {
-        toast.error("Please fill in product name and technical name");
-        return;
-      }
+      if (!productType) next.productType = "Please select product type";
+      if (!productName.trim()) next.productName = "Product name is required";
+      if (!technicalName.trim()) next.technicalName = "Technical name is required";
       const mfrId = manufacturerId || (product?.manufacturerId ?? "");
       if (!manufacturedById && !marketedById && !mfrId) {
-        toast.error("Please select manufactured by and marketed by");
-        return;
+        next.manufacturedById = "Please select manufactured by and marketed by";
       }
-      if (gstPercentage === undefined || gstPercentage === null) {
-        toast.error("Please enter GST percentage");
-        return;
-      }
-      if (!hsnCode.trim()) {
-        toast.error("Please enter HSN code");
-        return;
-      }
+      if (gstPercentage === undefined || gstPercentage === null) next.gstPercentage = "Please enter GST percentage";
+      if (!hsnCode.trim()) next.hsnCode = "HSN code is required";
       const existingPhotoCount = isEdit ? (product?.documents?.filter((d) => d.docType === "product_photo").length ?? 0) : 0;
       const totalPhotos = existingPhotoCount + productPhotos.length;
-      if (totalPhotos < 3) {
-        toast.error("Please upload at least 3 product photos");
-        return;
-      }
-      if (totalPhotos > 4) {
-        toast.error("Maximum 4 product photos allowed");
-        return;
-      }
-      if (sizes.length < 1) {
-        toast.error("Please add at least one product size");
-        return;
-      }
+      if (totalPhotos < 3) next.productPhotos = "Please upload at least 3 product photos";
+      if (totalPhotos > 4) next.productPhotos = "Maximum 4 product photos allowed";
+      if (sizes.length < 1) next.sizes = "Please add at least one product size";
       for (let i = 0; i < sizes.length; i++) {
         const s = sizes[i];
         if (!s.quantity.trim() || !s.unit || s.bottlesPerCase == null) {
-          toast.error(`Please fill in all fields for product size ${i + 1}`);
-          return;
+          next[`size_${i}`] = `Please fill in all fields for product size ${i + 1}`;
+          break;
         }
       }
-      if (!description.trim()) {
-        toast.error("Please enter product description");
-        return;
-      }
-      const hasPamphlet =
-        !!pamphletFile || (isEdit && product?.documents?.some((d) => d.docType === "product_pamphlet"));
-      if (!hasPamphlet) {
-        toast.error("Please upload product pamphlet PDF");
-        return;
-      }
-      if (!recommendedDose.trim()) {
-        toast.error("Please enter recommended dose");
-        return;
-      }
-      if (!doseUnit) {
-        toast.error("Please select recommended dose unit");
-        return;
-      }
-      if (crops.length < 1) {
-        toast.error("Please select at least one recommended crop");
+      if (!recommendedDose.trim()) next.recommendedDose = "Recommended dose is required";
+      if (!doseUnit) next.doseUnit = "Please select dose unit";
+      if (crops.length < 1) next.crops = "Please select at least one recommended crop";
+      const needsCir = ["PESTICIDE", "FUNGICIDE", "HERBICIDE", "BACTERIACIDE"].includes(productType);
+      if (needsCir && !cirNumber.trim()) next.cirNumber = "CIR number is required for this product type";
+      if (Object.keys(next).length > 0) {
+        setErrors(next);
+        const first = Object.values(next)[0];
+        if (first) toast.error(first);
         return;
       }
     } else {
-      if (!productName.trim() || !technicalName.trim() || !description.trim() || !hsnCode.trim() || !recommendedDose) {
+      if (!productName.trim() || !technicalName.trim() || !hsnCode.trim() || !recommendedDose) {
         return;
       }
     }
@@ -246,6 +233,7 @@ export default function ProductForm() {
           hsnCode: payload.hsnCode,
           recommendedDose: payload.recommendedDose,
           doseUnit: payload.doseUnit,
+          dosePerLiter: payload.dosePerLiter,
           sizes: payload.sizes,
           crops: payload.crops,
         });
@@ -318,10 +306,10 @@ export default function ProductForm() {
               <Label className="text-muted-foreground font-normal text-sm">Manufacturing Company</Label>
               <Select
                 value={manufacturerId}
-                onValueChange={setManufacturerId}
+                onValueChange={(v) => { setManufacturerId(v); clearError("manufacturerId"); }}
                 disabled={isEdit}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger className={`h-9 ${errors.manufacturerId ? "border-destructive" : ""}`}>
                   <SelectValue placeholder="Select manufacturer" />
                 </SelectTrigger>
                 <SelectContent>
@@ -335,8 +323,8 @@ export default function ProductForm() {
             </div>
             <div className="space-y-2">
               <Label className="text-muted-foreground font-normal text-sm">Product Type</Label>
-              <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
-                <SelectTrigger className="h-9">
+              <Select value={productType} onValueChange={(v) => { setProductType(v as ProductType); clearError("productType"); }}>
+                <SelectTrigger className={`h-9 ${errors.productType ? "border-destructive" : ""}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -350,8 +338,8 @@ export default function ProductForm() {
             </div>
             <div className="space-y-2">
               <Label className="text-muted-foreground font-normal text-sm">Manufactured By</Label>
-              <Select value={manufacturedById} onValueChange={setManufacturedById}>
-                <SelectTrigger className="h-9">
+              <Select value={manufacturedById} onValueChange={(v) => { setManufacturedById(v); clearError("manufacturedById"); }}>
+                <SelectTrigger className={`h-9 ${errors.manufacturedById ? "border-destructive" : ""}`}>
                   <SelectValue placeholder="Auto-filled from manufacturer" />
                 </SelectTrigger>
                 <SelectContent>
@@ -363,46 +351,62 @@ export default function ProductForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label className="text-muted-foreground font-normal text-sm">Marketed By</Label>
-              <Select value={marketedById} onValueChange={setMarketedById}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Auto-filled from manufacturer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {manufacturers.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.companyName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={marketedByDifferent}
+                onChange={(e) => setMarketedByDifferent(e.target.checked)}
+                className="rounded border-input"
+              />
+              <span className="text-sm text-muted-foreground">Marketed by a different company?</span>
+            </label>
+            {marketedByDifferent && (
+              <div className="space-y-2">
+                <Label className="text-muted-foreground font-normal text-sm">Marketed By</Label>
+                <Select value={marketedById} onValueChange={(v) => { setMarketedById(v); clearError("manufacturedById"); }}>
+                  <SelectTrigger className={`h-9 ${errors.manufacturedById ? "border-destructive" : ""}`}>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {manufacturers.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.companyName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
       <Card className="border-0 shadow-md bg-card">
         <CardHeader>
-          <CardTitle className="text-base">Basic Details</CardTitle>
+          <CardTitle className="text-base">Product Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">Product Name</Label>
-              <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product name" className="h-9" />
+              <Input value={productName} onChange={(e) => { setProductName(e.target.value); clearError("productName"); }} placeholder="Product name" className={`h-9 ${errors.productName ? "border-destructive" : ""}`} />
+              {errors.productName && <p className="text-xs text-destructive">{errors.productName}</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">Technical Name</Label>
-              <Input value={technicalName} onChange={(e) => setTechnicalName(e.target.value)} placeholder="Technical name" className="h-9" />
+              <Input value={technicalName} onChange={(e) => { setTechnicalName(e.target.value); clearError("technicalName"); }} placeholder="Technical name" className={`h-9 ${errors.technicalName ? "border-destructive" : ""}`} />
+              {errors.technicalName && <p className="text-xs text-destructive">{errors.technicalName}</p>}
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <Label className="text-muted-foreground font-normal text-sm">Description</Label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Product description" rows={3} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-muted-foreground font-normal text-sm">CIR Number (optional)</Label>
-              <Input value={cirNumber} onChange={(e) => setCirNumber(e.target.value)} placeholder="CIR Number" className="h-9" />
+              <Label className="text-muted-foreground font-normal text-sm">
+                CIR Number {["PESTICIDE", "FUNGICIDE", "HERBICIDE", "BACTERIACIDE"].includes(productType) ? "*" : "(optional)"}
+              </Label>
+              <Input value={cirNumber} onChange={(e) => { setCirNumber(e.target.value); clearError("cirNumber"); }} placeholder="CIR Number" className={`h-9 ${errors.cirNumber ? "border-destructive" : ""}`} />
+              {errors.cirNumber && <p className="text-xs text-destructive">{errors.cirNumber}</p>}
             </div>
           </div>
         </CardContent>
@@ -463,6 +467,7 @@ export default function ProductForm() {
                 const next = [...p, ...files].slice(0, 4);
                 return next;
               });
+              clearError("productPhotos");
               if (photoInputRef.current) photoInputRef.current.value = "";
             }}
           />
@@ -477,6 +482,7 @@ export default function ProductForm() {
             <Upload className="h-4 w-4 mr-2" />
             Add photos
           </Button>
+          {errors.productPhotos && <p className="text-xs text-destructive">{errors.productPhotos}</p>}
         </CardContent>
       </Card>
 
@@ -488,7 +494,7 @@ export default function ProductForm() {
           {isEdit ? (
             <>
               <InlineDocUpload
-                label="Product Pamphlet (PDF) *"
+                label="Product Pamphlet (PDF)"
                 documents={existingPamphletDocs.map((d) => ({ id: d.id, fileName: d.fileName, filePath: d.filePath }))}
                 onUpload={(files) => id && files.length > 0 && uploadDocs.mutate({ id, files, docType: "product_pamphlet" })}
                 onDelete={(docId) => id && deleteDocs.mutate({ id, docId })}
@@ -511,7 +517,7 @@ export default function ProductForm() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs font-medium">Product Pamphlet (PDF) *</Label>
+                <Label className="text-xs font-medium">Product Pamphlet (PDF)</Label>
                 {pamphletFile && (
                   <div className="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm bg-muted/30">
                     <span className="truncate flex-1">{pamphletFile.name}</span>
@@ -563,37 +569,49 @@ export default function ProductForm() {
         <CardHeader>
           <CardTitle className="text-base">Product Sizes</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {sizes.map((size, i) => (
-            <div key={i} className="space-y-2 rounded border p-3">
-              <div className="flex flex-wrap items-end gap-2">
-                <Input
-                  placeholder="Quantity"
-                  className="h-9 w-24"
-                  value={size.quantity}
-                  onChange={(e) => updateSize(i, "quantity", e.target.value)}
-                />
-                <Select value={size.unit} onValueChange={(v) => updateSize(i, "unit", v)}>
-                  <SelectTrigger className="h-9 w-24">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SIZE_UNITS.map((u) => (
-                      <SelectItem key={u} value={u}>{u}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="number"
-                  min={1}
-                  placeholder="Bottles/case"
-                  className="h-9 w-28"
-                  value={size.bottlesPerCase}
-                  onChange={(e) => updateSize(i, "bottlesPerCase", parseInt(e.target.value, 10) || 1)}
-                />
-                <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeSize(i)} disabled={sizes.length <= 1}>
+            <div key={i} className="rounded-lg border bg-muted/20 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-foreground">Size {i + 1}</h4>
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeSize(i)} disabled={sizes.length <= 1}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Quantity</Label>
+                  <Input
+                    placeholder="e.g. 100"
+                    className="h-9"
+                    value={size.quantity}
+                    onChange={(e) => { updateSize(i, "quantity", e.target.value); clearError("sizes"); clearError(`size_${i}`); }}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Unit</Label>
+                  <Select value={size.unit} onValueChange={(v) => { updateSize(i, "unit", v); clearError("sizes"); clearError(`size_${i}`); }}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SIZE_UNITS.map((u) => (
+                        <SelectItem key={u} value={u}>{u}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Bottles per case</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="1"
+                    className="h-9"
+                    value={size.bottlesPerCase}
+                    onChange={(e) => { updateSize(i, "bottlesPerCase", parseInt(e.target.value, 10) || 1); clearError("sizes"); clearError(`size_${i}`); }}
+                  />
+                </div>
               </div>
               {isEdit && product?.sizes?.[i]?.id ? (
                 <InlineDocUpload
@@ -643,12 +661,15 @@ export default function ProductForm() {
             <Plus className="h-4 w-4 mr-2" />
             Add Size
           </Button>
+          {(errors.sizes || Object.keys(errors).some((k) => k.startsWith("size_"))) && (
+            <p className="text-xs text-destructive">{errors.sizes || errors[Object.keys(errors).find((k) => k.startsWith("size_")) || ""]}</p>
+          )}
         </CardContent>
       </Card>
 
       <Card className="border-0 shadow-md bg-card">
         <CardHeader>
-          <CardTitle className="text-base">Tax & Dosage</CardTitle>
+          <CardTitle className="text-base">Tax Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -659,22 +680,35 @@ export default function ProductForm() {
                 min={0}
                 max={100}
                 value={gstPercentage}
-                onChange={(e) => setGstPercentage(parseFloat(e.target.value) || 0)}
-                className="h-9"
+                onChange={(e) => { setGstPercentage(parseFloat(e.target.value) || 0); clearError("gstPercentage"); }}
+                className={`h-9 ${errors.gstPercentage ? "border-destructive" : ""}`}
               />
+              {errors.gstPercentage && <p className="text-xs text-destructive">{errors.gstPercentage}</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">HSN Code</Label>
-              <Input value={hsnCode} onChange={(e) => setHsnCode(e.target.value)} placeholder="HSN Code" className="h-9" />
+              <Input value={hsnCode} onChange={(e) => { setHsnCode(e.target.value); clearError("hsnCode"); }} placeholder="HSN Code" className={`h-9 ${errors.hsnCode ? "border-destructive" : ""}`} />
+              {errors.hsnCode && <p className="text-xs text-destructive">{errors.hsnCode}</p>}
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">Dosage</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">Recommended Dose</Label>
-              <Input value={recommendedDose} onChange={(e) => setRecommendedDose(e.target.value)} placeholder="e.g. 100ml" className="h-9" />
+              <Input value={recommendedDose} onChange={(e) => { setRecommendedDose(e.target.value); clearError("recommendedDose"); }} placeholder="e.g. 100ml" className={`h-9 ${errors.recommendedDose ? "border-destructive" : ""}`} />
+              {errors.recommendedDose && <p className="text-xs text-destructive">{errors.recommendedDose}</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">Dose Unit</Label>
-              <Select value={doseUnit} onValueChange={(v) => setDoseUnit(v as DoseUnit)}>
-                <SelectTrigger className="h-9">
+              <Select value={doseUnit} onValueChange={(v) => { setDoseUnit(v as DoseUnit); clearError("doseUnit"); }}>
+                <SelectTrigger className={`h-9 ${errors.doseUnit ? "border-destructive" : ""}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -683,6 +717,10 @@ export default function ProductForm() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label className="text-muted-foreground font-normal text-sm">Dose per Liter (optional)</Label>
+              <Input value={dosePerLiter} onChange={(e) => setDosePerLiter(e.target.value)} placeholder="e.g. 2ml per liter" className="h-9" />
             </div>
           </div>
         </CardContent>
@@ -737,6 +775,7 @@ export default function ProductForm() {
               ))}
             </div>
           )}
+          {errors.crops && <p className="text-xs text-destructive mt-2">{errors.crops}</p>}
         </CardContent>
       </Card>
 

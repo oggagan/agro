@@ -37,12 +37,13 @@ export const createProductSchema = z
     technicalName: z.string().min(1, 'Technical name is required'),
     manufacturedById: z.string().uuid('Invalid manufactured by ID'),
     marketedById: z.string().uuid().optional().nullable(),
-    description: z.string().min(1, 'Product description is required'),
+    description: z.string().optional().nullable(),
     cirNumber: z.string().optional().nullable(),
     gstPercentage: z.number().min(0).max(100),
     hsnCode: z.string().min(1, 'HSN code is required'),
     recommendedDose: z.string().min(1, 'Recommended dose is required'),
     doseUnit: doseUnitEnum,
+    dosePerLiter: z.string().optional().nullable(),
     sizes: z.array(productSizeSchema).min(1, 'At least one product size is required'),
     crops: z.array(productCropSchema).min(1, 'At least one crop is required'),
     isDraft: z.boolean().optional().default(false),
@@ -63,6 +64,15 @@ export const createProductSchema = z
       );
     },
     { message: 'When not draft, all required fields must be filled', path: ['sizes'] },
+  )
+  .refine(
+    (d) => {
+      if (d.isDraft) return true;
+      const needsCir = ['PESTICIDE', 'FUNGICIDE', 'HERBICIDE', 'BACTERIACIDE'].includes(d.productType);
+      if (!needsCir) return true;
+      return d.cirNumber != null && String(d.cirNumber).trim().length > 0;
+    },
+    { message: 'CIR number is required for this product type', path: ['cirNumber'] },
   );
 
 export const updateProductSchema = z.object({
@@ -70,12 +80,13 @@ export const updateProductSchema = z.object({
   technicalName: z.string().min(1).optional(),
   manufacturedById: z.string().uuid().optional(),
   marketedById: z.string().uuid().optional().nullable(),
-  description: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
   cirNumber: z.string().optional().nullable(),
   gstPercentage: z.number().min(0).max(100).optional(),
   hsnCode: z.string().min(1).optional(),
   recommendedDose: z.string().min(1).optional(),
   doseUnit: doseUnitEnum.optional(),
+  dosePerLiter: z.string().optional().nullable(),
   sizes: z.array(productSizeSchema).optional(),
   crops: z.array(productCropSchema).optional(),
 });

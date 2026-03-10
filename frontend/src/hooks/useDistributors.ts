@@ -276,8 +276,8 @@ export function useUploadDistributorDocuments() {
   return useMutation({
     mutationFn: ({ distributorId, files, docType }: { distributorId: string; files: File[]; docType: string }) =>
       distributorsApi.uploadDocuments(distributorId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
       toast.success("Documents uploaded");
     },
     onError: (err: unknown) =>
@@ -291,8 +291,8 @@ export function useDeleteDistributorDocument() {
   return useMutation({
     mutationFn: ({ distributorId, docId }: { distributorId: string; docId: string }) =>
       distributorsApi.deleteDocument(distributorId, docId),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
       toast.success("Document deleted");
     },
     onError: (err: unknown) =>
@@ -315,8 +315,8 @@ export function useUploadDistributorDirectorDocuments() {
       files: File[];
       docType: string;
     }) => distributorsApi.uploadDirectorDocuments(distributorId, dirId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
       toast.success("Director document uploaded");
     },
     onError: (err: unknown) =>
@@ -339,8 +339,8 @@ export function useUploadDistributorAuthorizedPersonDocuments() {
       files: File[];
       docType: string;
     }) => distributorsApi.uploadAuthorizedPersonDocuments(distributorId, apId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
       toast.success("Authorized person document uploaded");
     },
     onError: (err: unknown) =>
@@ -354,8 +354,8 @@ export function useUploadDistributorBankDetailsDocuments() {
   return useMutation({
     mutationFn: ({ distributorId, files, docType }: { distributorId: string; files: File[]; docType: string }) =>
       distributorsApi.uploadBankDetailsDocuments(distributorId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
       toast.success("Bank details document uploaded");
     },
     onError: (err: unknown) =>
@@ -378,8 +378,8 @@ export function useUploadDistributorLicenseDocuments() {
       files: File[];
       docType: string;
     }) => distributorsApi.uploadLicenseDocuments(distributorId, licId, files, docType),
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
+    onSuccess: async (_, vars) => {
+      await queryClient.invalidateQueries({ queryKey: ["distributor", vars.distributorId] });
       toast.success("License document uploaded");
     },
     onError: (err: unknown) =>

@@ -4,6 +4,7 @@ import { AppError } from '../../middleware/error.middleware.js';
 import { createAuditLog, createStatusHistory } from '../../utils/audit.js';
 import { notDeleted, softDeleteData } from '../../utils/soft-delete.js';
 import { getPaginationParams, buildPaginationMeta } from '../../utils/pagination.js';
+import * as inventoryService from '../inventory/inventory.service.js';
 
 const distributorInclude = {
   user: {
@@ -16,6 +17,9 @@ const distributorInclude = {
       phones: true,
       emails: true,
     },
+  },
+  createdByUser: {
+    select: { id: true, name: true },
   },
   manufacturer: { select: { id: true, companyName: true } },
   retailer: { select: { id: true, companyName: true } },
@@ -305,7 +309,31 @@ export async function createDistributor(
     include: distributorInclude,
   });
 
-  return full;
+  try {
+    const addr = full?.addresses?.[0];
+    const displayName = full!.companyName || (full as any)?.user?.name || 'Distributor';
+    await inventoryService.createInventory(
+      {
+        ownerType: 'DISTRIBUTOR',
+        distributorId: full!.id,
+        name: `${displayName} Inventory`,
+        type: 'DISTRIBUTION_CENTER',
+        address1: addr?.address1 ?? 'To be updated',
+        address2: addr?.address2 ?? null,
+        city: addr?.city ?? 'To be updated',
+        state: addr?.state ?? 'To be updated',
+        pincode: addr?.pincode ?? '000000',
+      },
+      performedBy,
+      performedByRole,
+      ip,
+      userAgent,
+    );
+  } catch (_err) {
+    // Do not block distributor creation if auto-inventory fails
+  }
+
+  return full!;
 }
 
 // ─── Admin: List distributors ─────────────────────────────────────────────────

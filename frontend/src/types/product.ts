@@ -37,12 +37,13 @@ export interface Product {
   technicalName: string;
   manufacturedById: string;
   marketedById?: string | null;
-  description: string;
+  description?: string | null;
   cirNumber?: string | null;
   gstPercentage: number;
   hsnCode: string;
   recommendedDose: string;
   doseUnit: DoseUnit;
+  dosePerLiter?: string | null;
   status: ProductStatus;
   isDraft: boolean;
   manufacturer: { id: string; companyName: string };
@@ -62,12 +63,13 @@ export interface CreateProductPayload {
   technicalName: string;
   manufacturedById: string;
   marketedById?: string | null;
-  description: string;
+  description?: string | null;
   cirNumber?: string | null;
   gstPercentage: number;
   hsnCode: string;
   recommendedDose: string;
   doseUnit: DoseUnit;
+  dosePerLiter?: string | null;
   sizes: { quantity: string; unit: string; bottlesPerCase: number }[];
   crops: { cropName: string; isCustom?: boolean }[];
   isDraft?: boolean;
@@ -84,6 +86,7 @@ export interface UpdateProductPayload {
   hsnCode?: string;
   recommendedDose?: string;
   doseUnit?: DoseUnit;
+  dosePerLiter?: string | null;
   sizes?: { id?: string; quantity: string; unit: string; bottlesPerCase: number }[];
   crops?: { cropName: string; isCustom?: boolean }[];
 }

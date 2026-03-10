@@ -167,6 +167,13 @@ export default function RetailerForm() {
           {isEdit && retailer?.companyName && (
             <p className="text-sm text-muted-foreground mt-0.5">{retailer.companyName}</p>
           )}
+          {isEdit && (retailer?.createdByUser || retailer?.createdAt) && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {retailer.createdByUser && `Created by ${retailer.createdByUser.name}`}
+              {retailer.createdByUser && retailer.createdAt && " · "}
+              {retailer.createdAt && `Created ${new Date(retailer.createdAt).toLocaleDateString()}`}
+            </p>
+          )}
         </div>
       </div>
 
