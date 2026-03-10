@@ -315,54 +315,104 @@ export default function InventoryProducts() {
       </Card>
 
       <Dialog open={!!viewEntry} onOpenChange={(open) => !open && setViewEntry(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Inventory product details</DialogTitle>
           </DialogHeader>
           {viewEntry && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3 py-4 text-sm">
-              <div className="col-span-2 font-medium text-foreground">{viewEntry.product?.productName}</div>
-              <div className="text-muted-foreground">Company</div>
-              <div>{viewEntry.product?.manufacturer?.companyName ?? "—"}</div>
-              <div className="text-muted-foreground">Technical name</div>
-              <div>{viewEntry.product?.technicalName ?? "—"}</div>
-              <div className="text-muted-foreground">Stock</div>
-              <div>{viewEntry.stock} {viewEntry.unit}</div>
-              <div className="text-muted-foreground">Status</div>
-              <div>
-                <Badge variant="outline" className={`text-xs ${statusStyles[viewEntry.computedStatus ?? ""] ?? ""}`}>
-                  {viewEntry.computedStatus?.replace("_", " ") ?? "—"}
-                </Badge>
+            <>
+              <div className="grid grid-cols-3 gap-x-6 gap-y-3 py-4 text-sm">
+                <div className="col-span-3 font-medium text-foreground text-base">{viewEntry.product?.productName}</div>
+                <div className="text-muted-foreground">Company</div>
+                <div className="col-span-2">{viewEntry.product?.manufacturer?.companyName ?? "—"}</div>
+                <div className="text-muted-foreground">Technical name</div>
+                <div className="col-span-2">{viewEntry.product?.technicalName ?? "—"}</div>
+                <div className="text-muted-foreground">Stock</div>
+                <div>{viewEntry.stock} {viewEntry.unit}</div>
+                <div className="text-muted-foreground">Status</div>
+                <div>
+                  <Badge variant="outline" className={`text-xs ${statusStyles[viewEntry.computedStatus ?? ""] ?? ""}`}>
+                    {viewEntry.computedStatus?.replace("_", " ") ?? "—"}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground">Low stock threshold</div>
+                <div>{viewEntry.lowStockThreshold}</div>
+                <div className="text-muted-foreground">Purchase price (₹)</div>
+                <div>₹{Number(viewEntry.price).toLocaleString("en-IN")}</div>
+                <div className="text-muted-foreground">MRP (₹)</div>
+                <div>{viewEntry.mrp != null ? `₹${Number(viewEntry.mrp).toLocaleString("en-IN")}` : "—"}</div>
+                <div className="text-muted-foreground">Selling price (₹)</div>
+                <div>{viewEntry.sellingPrice != null ? `₹${Number(viewEntry.sellingPrice).toLocaleString("en-IN")}` : "—"}</div>
+                <div className="text-muted-foreground">Average cost (₹)</div>
+                <div>{viewEntry.averageCost != null ? `₹${Number(viewEntry.averageCost).toLocaleString("en-IN")}` : "—"}</div>
+                <div className="text-muted-foreground">Discount %</div>
+                <div>{viewEntry.discount != null ? `${Number(viewEntry.discount)}%` : "—"}</div>
+                <div className="text-muted-foreground">GST type</div>
+                <div>{viewEntry.gstInclusive ? "Inclusive GST" : "Exclusive GST"}</div>
+                <div className="text-muted-foreground">Batch number</div>
+                <div>{viewEntry.batchNumber ?? "—"}</div>
+                <div className="text-muted-foreground">Mfg date</div>
+                <div>{formatDate(viewEntry.mfgDate)}</div>
+                <div className="text-muted-foreground">Expiry date</div>
+                <div>{formatDate(viewEntry.expiryDate)}</div>
+                <div className="text-muted-foreground">Source type</div>
+                <div>{viewEntry.sourceType ?? "—"}</div>
+                <div className="text-muted-foreground">Purchased from</div>
+                <div className="col-span-2">{viewEntry.purchasedFrom ?? "—"}</div>
+                <div className="text-muted-foreground">Invoice number</div>
+                <div>{viewEntry.invoiceNumber ?? "—"}</div>
+                <div className="text-muted-foreground">Invoice date</div>
+                <div>{formatDate(viewEntry.invoiceDate)}</div>
               </div>
-              <div className="text-muted-foreground">Low stock threshold</div>
-              <div>{viewEntry.lowStockThreshold}</div>
-              <div className="text-muted-foreground">Purchase price (₹)</div>
-              <div>₹{Number(viewEntry.price).toLocaleString("en-IN")}</div>
-              <div className="text-muted-foreground">MRP (₹)</div>
-              <div>{viewEntry.mrp != null ? `₹${Number(viewEntry.mrp).toLocaleString("en-IN")}` : "—"}</div>
-              <div className="text-muted-foreground">Selling price (₹)</div>
-              <div>{viewEntry.sellingPrice != null ? `₹${Number(viewEntry.sellingPrice).toLocaleString("en-IN")}` : "—"}</div>
-              <div className="text-muted-foreground">Average cost (₹)</div>
-              <div>{viewEntry.averageCost != null ? `₹${Number(viewEntry.averageCost).toLocaleString("en-IN")}` : "—"}</div>
-              <div className="text-muted-foreground">Discount %</div>
-              <div>{viewEntry.discount != null ? `${Number(viewEntry.discount)}%` : "—"}</div>
-              <div className="text-muted-foreground">GST type</div>
-              <div>{viewEntry.gstInclusive ? "Inclusive GST" : "Exclusive GST"}</div>
-              <div className="text-muted-foreground">Batch number</div>
-              <div>{viewEntry.batchNumber ?? "—"}</div>
-              <div className="text-muted-foreground">Mfg date</div>
-              <div>{formatDate(viewEntry.mfgDate)}</div>
-              <div className="text-muted-foreground">Expiry date</div>
-              <div>{formatDate(viewEntry.expiryDate)}</div>
-              <div className="text-muted-foreground">Source type</div>
-              <div>{viewEntry.sourceType ?? "—"}</div>
-              <div className="text-muted-foreground">Purchased from</div>
-              <div>{viewEntry.purchasedFrom ?? "—"}</div>
-              <div className="text-muted-foreground">Invoice number</div>
-              <div>{viewEntry.invoiceNumber ?? "—"}</div>
-              <div className="text-muted-foreground">Invoice date</div>
-              <div>{formatDate(viewEntry.invoiceDate)}</div>
-            </div>
+              {(() => {
+                const otherBatches = inventoryProducts.filter(
+                  (p) => p.productId === viewEntry.productId && p.id !== viewEntry.id
+                );
+                if (otherBatches.length > 0) {
+                  return (
+                    <div className="border-t pt-4 mt-2">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Other batches for this product ({otherBatches.length})</p>
+                      <div className="rounded-md border overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="h-8 text-xs">Batch</TableHead>
+                              <TableHead className="h-8 text-xs">Stock</TableHead>
+                              <TableHead className="h-8 text-xs">Expiry</TableHead>
+                              <TableHead className="h-8 text-xs">Status</TableHead>
+                              <TableHead className="h-8 text-xs text-right w-20">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {otherBatches.map((ob) => (
+                              <TableRow key={ob.id} className="text-sm">
+                                <TableCell className="py-2">{ob.batchNumber ?? "—"}</TableCell>
+                                <TableCell className="py-2">{ob.stock} {ob.unit}</TableCell>
+                                <TableCell className="py-2">{formatDate(ob.expiryDate)}</TableCell>
+                                <TableCell className="py-2">
+                                  <Badge variant="outline" className={`text-xs ${statusStyles[ob.computedStatus ?? ""] ?? ""}`}>
+                                    {ob.computedStatus?.replace("_", " ") ?? "—"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-2 text-right">
+                                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewEntry(ob)} title="View this batch">
+                                    <Eye className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setViewEntry(null); openEdit(ob); }} title="Edit">
+                                    <Edit className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewEntry(null)}>Close</Button>
@@ -376,13 +426,13 @@ export default function InventoryProducts() {
       </Dialog>
 
       <Dialog open={!!editEntry} onOpenChange={(open) => !open && setEditEntry(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit stock & pricing</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            {editEntry && <p className="text-sm text-muted-foreground font-medium">{editEntry.product?.productName}</p>}
-            <div className="grid grid-cols-2 gap-4">
+          <div className="py-4">
+            {editEntry && <p className="text-sm text-muted-foreground font-medium mb-4">{editEntry.product?.productName}</p>}
+            <div className="grid grid-cols-3 gap-x-6 gap-y-4">
               <div className="space-y-2">
                 <Label>Stock</Label>
                 <Input type="number" min={0} value={formStock} onChange={(e) => setFormStock(parseInt(e.target.value, 10) || 0)} className="h-9" />
@@ -400,8 +450,6 @@ export default function InventoryProducts() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Purchase price (₹)</Label>
                 <Input type="number" min={0} step={0.01} value={formPrice} onChange={(e) => setFormPrice(parseFloat(e.target.value) || 0)} className="h-9" />
@@ -418,8 +466,6 @@ export default function InventoryProducts() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>MRP (₹)</Label>
                 <Input type="number" min={0} step={0.01} value={formMrp} onChange={(e) => setFormMrp(e.target.value)} placeholder="Optional" className="h-9" />
@@ -428,8 +474,6 @@ export default function InventoryProducts() {
                 <Label>Selling price (₹)</Label>
                 <Input type="number" min={0} step={0.01} value={formSellingPrice} onChange={(e) => setFormSellingPrice(e.target.value)} placeholder="Optional" className="h-9" />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Discount %</Label>
                 <Input type="number" min={0} max={100} step={0.01} value={formDiscount} onChange={(e) => setFormDiscount(e.target.value)} placeholder="Optional" className="h-9" />
@@ -447,12 +491,14 @@ export default function InventoryProducts() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Batch number</Label>
-              <Input value={formBatchNumber} onChange={(e) => setFormBatchNumber(e.target.value)} placeholder="Optional" className="h-9" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Low stock threshold</Label>
+                <Input type="number" min={0} value={formLowStockThreshold} onChange={(e) => setFormLowStockThreshold(parseInt(e.target.value, 10) || 0)} className="h-9" />
+              </div>
+              <div className="space-y-2 col-span-3">
+                <Label>Batch number</Label>
+                <Input value={formBatchNumber} onChange={(e) => setFormBatchNumber(e.target.value)} placeholder="Optional" className="h-9" />
+              </div>
               <div className="space-y-2">
                 <Label>Mfg date</Label>
                 <Input type="date" value={formMfgDate} onChange={(e) => setFormMfgDate(e.target.value)} className="h-9" />
@@ -461,24 +507,18 @@ export default function InventoryProducts() {
                 <Label>Expiry date</Label>
                 <Input type="date" value={formExpiryDate} onChange={(e) => setFormExpiryDate(e.target.value)} className="h-9" />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Purchased from</Label>
-              <Input value={formPurchasedFrom} onChange={(e) => setFormPurchasedFrom(e.target.value)} placeholder="Optional" className="h-9" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Invoice number</Label>
-                <Input value={formInvoiceNumber} onChange={(e) => setFormInvoiceNumber(e.target.value)} placeholder="Optional" className="h-9" />
-              </div>
               <div className="space-y-2">
                 <Label>Invoice date</Label>
                 <Input type="date" value={formInvoiceDate} onChange={(e) => setFormInvoiceDate(e.target.value)} className="h-9" />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Low stock threshold</Label>
-              <Input type="number" min={0} value={formLowStockThreshold} onChange={(e) => setFormLowStockThreshold(parseInt(e.target.value, 10) || 0)} className="h-9" />
+              <div className="space-y-2">
+                <Label>Purchased from</Label>
+                <Input value={formPurchasedFrom} onChange={(e) => setFormPurchasedFrom(e.target.value)} placeholder="Optional" className="h-9" />
+              </div>
+              <div className="space-y-2">
+                <Label>Invoice number</Label>
+                <Input value={formInvoiceNumber} onChange={(e) => setFormInvoiceNumber(e.target.value)} placeholder="Optional" className="h-9" />
+              </div>
             </div>
           </div>
           <DialogFooter>
