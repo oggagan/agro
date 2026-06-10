@@ -74,6 +74,10 @@ export default function Products() {
   const updateStatus = useUpdateProductStatus();
 
   const handleStatusToggle = (p: Product) => {
+    if (p.status === "PENDING") {
+      updateStatus.mutate({ id: p.id, status: "ACTIVE" });
+      return;
+    }
     if (p.status !== "ACTIVE" && p.status !== "INACTIVE") return;
     const newStatus: ProductStatus = p.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     updateStatus.mutate({ id: p.id, status: newStatus });
@@ -238,10 +242,10 @@ export default function Products() {
                         <TableCell className="py-3">
                           <Badge
                             variant="outline"
-                            className={`text-xs font-medium ${(p.status === "ACTIVE" || p.status === "INACTIVE") ? "cursor-pointer" : ""} ${statusStyles[p.status] ?? "bg-muted/80 text-muted-foreground"}`}
+                            className={`text-xs font-medium ${(p.status === "ACTIVE" || p.status === "INACTIVE" || p.status === "PENDING") ? "cursor-pointer" : ""} ${statusStyles[p.status] ?? "bg-muted/80 text-muted-foreground"}`}
                             onClick={() => handleStatusToggle(p)}
                           >
-                            {(p.status === "ACTIVE" || p.status === "INACTIVE") && updateStatus.isPending ? (
+                            {(p.status === "ACTIVE" || p.status === "INACTIVE" || p.status === "PENDING") && updateStatus.isPending ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
                             ) : (
                               p.status

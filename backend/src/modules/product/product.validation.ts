@@ -16,7 +16,7 @@ const productTypeEnum = z.enum([
 
 const productStatusEnum = z.enum(['DRAFT', 'PENDING', 'ACTIVE', 'INACTIVE', 'DECLINED', 'REVERIFY']);
 
-const doseUnitEnum = z.enum(['PER_ACRE', 'PER_HECTARE']);
+const doseUnitEnum = z.enum(['PER_ACRE', 'PER_HECTARE', 'PER_LITER_WATER']);
 
 const productSizeSchema = z.object({
   quantity: z.string().min(1, 'Quantity is required'),

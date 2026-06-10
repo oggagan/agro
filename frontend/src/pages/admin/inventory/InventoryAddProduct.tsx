@@ -56,6 +56,15 @@ export default function InventoryAddProduct() {
   const [sellingPrice, setSellingPrice] = useState("");
   const [lowStockThreshold, setLowStockThreshold] = useState(10);
   const [batches, setBatches] = useState<BatchRow[]>([defaultBatchRow()]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearError = (field: string) => {
+    setErrors((e) => {
+      const next = { ...e };
+      delete next[field];
+      return next;
+    });
+  };
 
   const { data: selectedProduct } = useProduct(productId || undefined);
   const sizes: ProductSize[] = selectedProduct?.sizes ?? [];
@@ -98,39 +107,40 @@ export default function InventoryAddProduct() {
   const addBatchMutation = useAddInventoryProductBatch();
 
   const validate = (): boolean => {
+    const next: Record<string, string> = {};
     if (!productId) {
-      toast.error("Please select a product");
-      return false;
+      next.productId = "Please select a product";
     }
     if (batches.length === 0) {
-      toast.error("Add at least one batch");
-      return false;
+      next.batches = "Add at least one batch";
     }
     for (let i = 0; i < batches.length; i++) {
       const b = batches[i];
       if (!(b.batchNumber?.trim())) {
-        toast.error(`Batch ${i + 1}: Batch number is required`);
-        return false;
+        next[`batch_${i}_batchNumber`] = "Batch number is required";
       }
       if (!Number.isFinite(b.stock) || b.stock < 1) {
-        toast.error(`Batch ${i + 1}: Quantity must be at least 1`);
-        return false;
+        next[`batch_${i}_stock`] = "Quantity must be at least 1";
       }
       if (!Number.isFinite(b.price) || b.price <= 0) {
-        toast.error(`Batch ${i + 1}: Purchase price must be greater than 0`);
-        return false;
+        next[`batch_${i}_price`] = "Purchase price must be greater than 0";
       }
       const mfg = b.mfgDate ? new Date(b.mfgDate).getTime() : null;
       const exp = b.expiryDate ? new Date(b.expiryDate).getTime() : null;
       if (mfg != null && exp != null && exp <= mfg) {
-        toast.error(`Batch ${i + 1}: Expiry date must be after manufacturing date`);
-        return false;
+        next[`batch_${i}_dates`] = "Expiry date must be after manufacturing date";
       }
     }
     const mrpNum = mrp ? parseFloat(mrp) : null;
     const sellNum = sellingPrice ? parseFloat(sellingPrice) : null;
     if (mrpNum != null && sellNum != null && mrpNum < sellNum) {
-      toast.warning("MRP is less than selling price");
+      next.mrpSelling = "MRP is less than selling price";
+    }
+    setErrors(next);
+    if (Object.keys(next).length > 0) {
+      const first = Object.values(next)[0];
+      if (first) toast.error(first);
+      return false;
     }
     return true;
   };
@@ -201,8 +211,8 @@ export default function InventoryAddProduct() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Product</Label>
-            <Select value={productId} onValueChange={(v) => { setProductId(v); setProductSizeId(null); }}>
-              <SelectTrigger className="h-9">
+            <Select value={productId} onValueChange={(v) => { setProductId(v); setProductSizeId(null); clearError("productId"); }}>
+              <SelectTrigger className={`h-9 ${errors.productId ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent>
@@ -213,6 +223,7 @@ export default function InventoryAddProduct() {
                 ))}
               </SelectContent>
             </Select>
+            {errors.productId && <p className="text-xs text-destructive">{errors.productId}</p>}
           </div>
           {sizes.length > 0 && (
             <div className="space-y-2">
@@ -306,9 +317,9 @@ export default function InventoryAddProduct() {
                 min={0}
                 step={0.01}
                 value={mrp}
-                onChange={(e) => setMrp(e.target.value)}
+                onChange={(e) => { setMrp(e.target.value); clearError("mrpSelling"); }}
                 placeholder="Optional"
-                className="h-9"
+                className={`h-9 ${errors.mrpSelling ? "border-destructive" : ""}`}
               />
             </div>
             <div className="space-y-2">
@@ -318,10 +329,11 @@ export default function InventoryAddProduct() {
                 min={0}
                 step={0.01}
                 value={sellingPrice}
-                onChange={(e) => setSellingPrice(e.target.value)}
+                onChange={(e) => { setSellingPrice(e.target.value); clearError("mrpSelling"); }}
                 placeholder="Optional"
-                className="h-9"
+                className={`h-9 ${errors.mrpSelling ? "border-destructive" : ""}`}
               />
+              {errors.mrpSelling && <p className="text-xs text-destructive">{errors.mrpSelling}</p>}
             </div>
             <div className="space-y-2">
               <Label>Low stock threshold</Label>
@@ -374,18 +386,25 @@ export default function InventoryAddProduct() {
                     <Label>Batch number *</Label>
                     <Input
                       value={batch.batchNumber}
-                      onChange={(e) => updateBatch(index, "batchNumber", e.target.value)}
+                      onChange={(e) => {
+                        updateBatch(index, "batchNumber", e.target.value);
+                        clearError(`batch_${index}_batchNumber`);
+                      }}
                       placeholder="e.g. BATCH-2024-001"
-                      className="h-9"
+                      className={`h-9 ${errors[`batch_${index}_batchNumber`] ? "border-destructive" : ""}`}
                     />
+                    {errors[`batch_${index}_batchNumber`] && <p className="text-xs text-destructive">{errors[`batch_${index}_batchNumber`]}</p>}
                   </div>
                   <div className="space-y-1">
                     <Label>Mfg date</Label>
                     <Input
                       type="date"
                       value={batch.mfgDate}
-                      onChange={(e) => updateBatch(index, "mfgDate", e.target.value)}
-                      className="h-9"
+                      onChange={(e) => {
+                        updateBatch(index, "mfgDate", e.target.value);
+                        clearError(`batch_${index}_dates`);
+                      }}
+                      className={`h-9 ${errors[`batch_${index}_dates`] ? "border-destructive" : ""}`}
                     />
                   </div>
                   <div className="space-y-1">
@@ -393,9 +412,13 @@ export default function InventoryAddProduct() {
                     <Input
                       type="date"
                       value={batch.expiryDate}
-                      onChange={(e) => updateBatch(index, "expiryDate", e.target.value)}
-                      className="h-9"
+                      onChange={(e) => {
+                        updateBatch(index, "expiryDate", e.target.value);
+                        clearError(`batch_${index}_dates`);
+                      }}
+                      className={`h-9 ${errors[`batch_${index}_dates`] ? "border-destructive" : ""}`}
                     />
+                    {errors[`batch_${index}_dates`] && <p className="text-xs text-destructive">{errors[`batch_${index}_dates`]}</p>}
                   </div>
                   <div className="space-y-1">
                     <Label>Quantity *</Label>
@@ -403,9 +426,13 @@ export default function InventoryAddProduct() {
                       type="number"
                       min={1}
                       value={batch.stock}
-                      onChange={(e) => updateBatch(index, "stock", parseInt(e.target.value, 10) || 0)}
-                      className="h-9"
+                      onChange={(e) => {
+                        updateBatch(index, "stock", parseInt(e.target.value, 10) || 0);
+                        clearError(`batch_${index}_stock`);
+                      }}
+                      className={`h-9 ${errors[`batch_${index}_stock`] ? "border-destructive" : ""}`}
                     />
+                    {errors[`batch_${index}_stock`] && <p className="text-xs text-destructive">{errors[`batch_${index}_stock`]}</p>}
                   </div>
                   <div className="space-y-1">
                     <Label>Unit *</Label>
@@ -430,9 +457,13 @@ export default function InventoryAddProduct() {
                       min={0}
                       step={0.01}
                       value={batch.price || ""}
-                      onChange={(e) => updateBatch(index, "price", parseFloat(e.target.value) || 0)}
-                      className="h-9"
+                      onChange={(e) => {
+                        updateBatch(index, "price", parseFloat(e.target.value) || 0);
+                        clearError(`batch_${index}_price`);
+                      }}
+                      className={`h-9 ${errors[`batch_${index}_price`] ? "border-destructive" : ""}`}
                     />
+                    {errors[`batch_${index}_price`] && <p className="text-xs text-destructive">{errors[`batch_${index}_price`]}</p>}
                   </div>
                   <div className="space-y-1 flex flex-col justify-end">
                     <Label>GST</Label>

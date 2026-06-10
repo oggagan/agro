@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "DoseUnit" ADD VALUE 'PER_LITER_WATER';

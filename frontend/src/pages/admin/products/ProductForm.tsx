@@ -21,7 +21,7 @@ const PRODUCT_TYPES: ProductType[] = [
   "BIO_PESTICIDE", "BIO_FUNGICIDE", "BIO_PGR", "BIO_FERTILIZER",
 ];
 
-const DOSE_UNITS: DoseUnit[] = ["PER_ACRE", "PER_HECTARE"];
+const DOSE_UNITS: DoseUnit[] = ["PER_ACRE", "PER_HECTARE", "PER_LITER_WATER"];
 const SIZE_UNITS = ["ml", "L", "kg", "g"];
 
 const emptySize = () => ({ quantity: "", unit: "ml", bottlesPerCase: 1 });
@@ -52,7 +52,6 @@ export default function ProductForm() {
   const [recommendedDose, setRecommendedDose] = useState("");
   const [doseUnit, setDoseUnit] = useState<DoseUnit>("PER_ACRE");
   const [dosePerLiter, setDosePerLiter] = useState("");
-  const [marketedByDifferent, setMarketedByDifferent] = useState(false);
   const [sizes, setSizes] = useState<{ quantity: string; unit: string; bottlesPerCase: number }[]>([emptySize()]);
   const [crops, setCrops] = useState<{ cropName: string; isCustom: boolean }[]>([]);
   const [customCrop, setCustomCrop] = useState("");
@@ -96,7 +95,6 @@ export default function ProductForm() {
       setRecommendedDose(product.recommendedDose);
       setDoseUnit(product.doseUnit);
       setDosePerLiter(product.dosePerLiter ?? "");
-      setMarketedByDifferent(!!(product.marketedById && product.marketedById !== product.manufacturedById));
       setSizes(
         product.sizes?.length
           ? product.sizes.map((s) => ({
@@ -115,13 +113,9 @@ export default function ProductForm() {
   useEffect(() => {
     if (!isEdit && manufacturerId) {
       setManufacturedById(manufacturerId);
-      if (!marketedByDifferent) setMarketedById(manufacturerId);
+      setMarketedById(manufacturerId);
     }
-  }, [manufacturerId, isEdit, marketedByDifferent]);
-
-  useEffect(() => {
-    if (!marketedByDifferent) setMarketedById(manufacturedById);
-  }, [marketedByDifferent, manufacturedById]);
+  }, [manufacturerId, isEdit]);
 
   const addSize = () => {
     setSizes((s) => [...s, emptySize()]);
@@ -154,7 +148,7 @@ export default function ProductForm() {
     productName: productName.trim(),
     technicalName: technicalName.trim(),
     manufacturedById: manufacturedById || mfrId,
-    marketedById: marketedByDifferent ? (marketedById || mfrId) : (manufacturedById || mfrId),
+    marketedById: marketedById || mfrId,
     description: description.trim() || undefined,
     cirNumber: cirNumber.trim() || undefined,
     gstPercentage,
@@ -298,12 +292,12 @@ export default function ProductForm() {
 
       <Card className="border-0 shadow-md bg-card">
         <CardHeader>
-          <CardTitle className="text-base">Manufacturer & Type</CardTitle>
+          <CardTitle className="text-base">Company</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-muted-foreground font-normal text-sm">Manufacturing Company</Label>
+              <Label className="text-muted-foreground font-normal text-sm">Marketing Company</Label>
               <Select
                 value={manufacturerId}
                 onValueChange={(v) => { setManufacturerId(v); clearError("manufacturerId"); }}
@@ -322,8 +316,56 @@ export default function ProductForm() {
               </Select>
             </div>
             <div className="space-y-2">
+              <Label className="text-muted-foreground font-normal text-sm">Manufactured By</Label>
+              <Select value={manufacturedById} onValueChange={(v) => { setManufacturedById(v); clearError("manufacturedById"); }}>
+                <SelectTrigger className={`h-9 ${errors.manufacturedById ? "border-destructive" : ""}`}>
+                  <SelectValue placeholder="Auto-filled from company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {manufacturers.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.companyName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground font-normal text-sm">Marketed By</Label>
+              <Select value={marketedById} onValueChange={(v) => { setMarketedById(v); clearError("manufacturedById"); }}>
+                <SelectTrigger className={`h-9 ${errors.manufacturedById ? "border-destructive" : ""}`}>
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {manufacturers.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.companyName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">Product Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">Product Type</Label>
-              <Select value={productType} onValueChange={(v) => { setProductType(v as ProductType); clearError("productType"); }}>
+              <Select
+                value={productType}
+                onValueChange={(v) => {
+                  const newType = v as ProductType;
+                  setProductType(newType);
+                  clearError("productType");
+                  if (!["PESTICIDE", "FUNGICIDE", "HERBICIDE", "BACTERIACIDE"].includes(newType)) setCirNumber("");
+                }}
+              >
                 <SelectTrigger className={`h-9 ${errors.productType ? "border-destructive" : ""}`}>
                   <SelectValue />
                 </SelectTrigger>
@@ -335,58 +377,8 @@ export default function ProductForm() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.productType && <p className="text-xs text-destructive">{errors.productType}</p>}
             </div>
-            <div className="space-y-2">
-              <Label className="text-muted-foreground font-normal text-sm">Manufactured By</Label>
-              <Select value={manufacturedById} onValueChange={(v) => { setManufacturedById(v); clearError("manufacturedById"); }}>
-                <SelectTrigger className={`h-9 ${errors.manufacturedById ? "border-destructive" : ""}`}>
-                  <SelectValue placeholder="Auto-filled from manufacturer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {manufacturers.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.companyName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={marketedByDifferent}
-                onChange={(e) => setMarketedByDifferent(e.target.checked)}
-                className="rounded border-input"
-              />
-              <span className="text-sm text-muted-foreground">Marketed by a different company?</span>
-            </label>
-            {marketedByDifferent && (
-              <div className="space-y-2">
-                <Label className="text-muted-foreground font-normal text-sm">Marketed By</Label>
-                <Select value={marketedById} onValueChange={(v) => { setMarketedById(v); clearError("manufacturedById"); }}>
-                  <SelectTrigger className={`h-9 ${errors.manufacturedById ? "border-destructive" : ""}`}>
-                    <SelectValue placeholder="Select company" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {manufacturers.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.companyName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-0 shadow-md bg-card">
-        <CardHeader>
-          <CardTitle className="text-base">Product Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-muted-foreground font-normal text-sm">Product Name</Label>
               <Input value={productName} onChange={(e) => { setProductName(e.target.value); clearError("productName"); }} placeholder="Product name" className={`h-9 ${errors.productName ? "border-destructive" : ""}`} />
@@ -401,13 +393,13 @@ export default function ProductForm() {
               <Label className="text-muted-foreground font-normal text-sm">Description</Label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Product description" rows={3} />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-muted-foreground font-normal text-sm">
-                CIR Number {["PESTICIDE", "FUNGICIDE", "HERBICIDE", "BACTERIACIDE"].includes(productType) ? "*" : "(optional)"}
-              </Label>
-              <Input value={cirNumber} onChange={(e) => { setCirNumber(e.target.value); clearError("cirNumber"); }} placeholder="CIR Number" className={`h-9 ${errors.cirNumber ? "border-destructive" : ""}`} />
-              {errors.cirNumber && <p className="text-xs text-destructive">{errors.cirNumber}</p>}
-            </div>
+            {["PESTICIDE", "FUNGICIDE", "HERBICIDE", "BACTERIACIDE"].includes(productType) && (
+              <div className="space-y-1.5">
+                <Label className="text-muted-foreground font-normal text-sm">CIR Number *</Label>
+                <Input value={cirNumber} onChange={(e) => { setCirNumber(e.target.value); clearError("cirNumber"); }} placeholder="CIR Number" className={`h-9 ${errors.cirNumber ? "border-destructive" : ""}`} />
+                {errors.cirNumber && <p className="text-xs text-destructive">{errors.cirNumber}</p>}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -589,7 +581,7 @@ export default function ProductForm() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Unit</Label>
+                  <Label className="text-xs text-muted-foreground">Quantity Type</Label>
                   <Select value={size.unit} onValueChange={(v) => { updateSize(i, "unit", v); clearError("sizes"); clearError(`size_${i}`); }}>
                     <SelectTrigger className="h-9">
                       <SelectValue />

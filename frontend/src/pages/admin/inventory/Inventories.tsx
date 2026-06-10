@@ -78,7 +78,7 @@ export default function Inventories() {
   return (
     <div className="space-y-5 animate-fade-in">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">Inventory</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Warehouse</h1>
         <Button
           className="bg-gradient-primary h-10"
           onClick={() => navigate("/dashboard/admin/inventory/add")}

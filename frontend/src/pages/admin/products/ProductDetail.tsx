@@ -19,10 +19,17 @@ export default function ProductDetail() {
   const { data: product, isLoading } = useProduct(id);
   const updateStatus = useUpdateProductStatus();
 
-  const canToggleStatus = product?.status === "ACTIVE" || product?.status === "INACTIVE";
+  const canActivate = product?.status === "PENDING";
+  const canToggleActiveInactive = product?.status === "ACTIVE" || product?.status === "INACTIVE";
+  const canToggleStatus = canActivate || canToggleActiveInactive;
   const handleStatusToggle = () => {
     if (!product || !canToggleStatus) return;
-    const newStatus: ProductStatus = product.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    const newStatus: ProductStatus =
+      product.status === "PENDING"
+        ? "ACTIVE"
+        : product.status === "ACTIVE"
+          ? "INACTIVE"
+          : "ACTIVE";
     updateStatus.mutate({ id: product.id, status: newStatus });
   };
 
@@ -74,13 +81,19 @@ export default function ProductDetail() {
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <p className="text-sm text-muted-foreground">Product Type</p>
+              <p className="font-medium">{formatProductType(product.productType)}</p>
+            </div>
+            <div>
               <p className="text-sm text-muted-foreground">Technical Name</p>
               <p className="font-medium">{product.technicalName}</p>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">CIR Number</p>
-              <p className="font-medium">{product.cirNumber ?? "—"}</p>
-            </div>
+            {["PESTICIDE", "FUNGICIDE", "HERBICIDE", "BACTERIACIDE"].includes(product.productType) && (
+              <div>
+                <p className="text-sm text-muted-foreground">CIR Number</p>
+                <p className="font-medium">{product.cirNumber ?? "—"}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">Manufactured By</p>
               <p className="font-medium">{product.manufacturedBy?.companyName ?? "—"}</p>

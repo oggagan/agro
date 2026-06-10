@@ -22,7 +22,7 @@ const adminItems = [
   { icon: Store, label: "Retailers", path: "/dashboard/admin/retailers" },
   { icon: Truck, label: "Distributors", path: "/dashboard/admin/distributors" },
   { icon: Package, label: "Products", path: "/dashboard/admin/products" },
-  { icon: Warehouse, label: "Inventory", path: "/dashboard/admin/inventory" },
+  { icon: Warehouse, label: "Warehouse", path: "/dashboard/admin/inventory" },
 ];
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>

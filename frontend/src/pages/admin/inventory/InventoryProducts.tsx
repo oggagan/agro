@@ -77,6 +77,15 @@ export default function InventoryProducts() {
   const [formInvoiceNumber, setFormInvoiceNumber] = useState("");
   const [formInvoiceDate, setFormInvoiceDate] = useState("");
   const [formLowStockThreshold, setFormLowStockThreshold] = useState(10);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const clearFormError = (field: string) => {
+    setFormErrors((e) => {
+      const next = { ...e };
+      delete next[field];
+      return next;
+    });
+  };
 
   const resetForm = () => {
     setFormStock(1);
@@ -98,6 +107,14 @@ export default function InventoryProducts() {
 
   const handleEdit = () => {
     if (!id || !editEntry) return;
+    const nextErrors: Record<string, string> = {};
+    if (!Number.isFinite(formStock) || formStock < 0) nextErrors.formStock = "Stock must be 0 or greater";
+    if (!Number.isFinite(formPrice) || formPrice < 0) nextErrors.formPrice = "Purchase price must be 0 or greater";
+    const mrpNum = formMrp !== "" ? parseFloat(formMrp) : null;
+    const sellNum = formSellingPrice !== "" ? parseFloat(formSellingPrice) : null;
+    if (mrpNum != null && sellNum != null && mrpNum < sellNum) nextErrors.mrpSelling = "MRP cannot be less than selling price";
+    setFormErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     const payload: Record<string, unknown> = {
       stock: formStock,
       unit: formUnit,
@@ -125,6 +142,7 @@ export default function InventoryProducts() {
         onSuccess: () => {
           setEditEntry(null);
           resetForm();
+          setFormErrors({});
         },
       }
     );
@@ -147,6 +165,7 @@ export default function InventoryProducts() {
     setFormInvoiceNumber(entry.invoiceNumber ?? "");
     setFormInvoiceDate(entry.invoiceDate ? new Date(entry.invoiceDate).toISOString().slice(0, 10) : "");
     setFormLowStockThreshold(entry.lowStockThreshold);
+    setFormErrors({});
   };
 
   const confirmDelete = () => {
@@ -435,7 +454,14 @@ export default function InventoryProducts() {
             <div className="grid grid-cols-3 gap-x-6 gap-y-4">
               <div className="space-y-2">
                 <Label>Stock</Label>
-                <Input type="number" min={0} value={formStock} onChange={(e) => setFormStock(parseInt(e.target.value, 10) || 0)} className="h-9" />
+                <Input
+                  type="number"
+                  min={0}
+                  value={formStock}
+                  onChange={(e) => { setFormStock(parseInt(e.target.value, 10) || 0); clearFormError("formStock"); }}
+                  className={`h-9 ${formErrors.formStock ? "border-destructive" : ""}`}
+                />
+                {formErrors.formStock && <p className="text-xs text-destructive">{formErrors.formStock}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Unit</Label>
@@ -452,7 +478,15 @@ export default function InventoryProducts() {
               </div>
               <div className="space-y-2">
                 <Label>Purchase price (₹)</Label>
-                <Input type="number" min={0} step={0.01} value={formPrice} onChange={(e) => setFormPrice(parseFloat(e.target.value) || 0)} className="h-9" />
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formPrice}
+                  onChange={(e) => { setFormPrice(parseFloat(e.target.value) || 0); clearFormError("formPrice"); }}
+                  className={`h-9 ${formErrors.formPrice ? "border-destructive" : ""}`}
+                />
+                {formErrors.formPrice && <p className="text-xs text-destructive">{formErrors.formPrice}</p>}
               </div>
               <div className="space-y-2">
                 <Label>GST type</Label>
@@ -468,11 +502,28 @@ export default function InventoryProducts() {
               </div>
               <div className="space-y-2">
                 <Label>MRP (₹)</Label>
-                <Input type="number" min={0} step={0.01} value={formMrp} onChange={(e) => setFormMrp(e.target.value)} placeholder="Optional" className="h-9" />
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formMrp}
+                  onChange={(e) => { setFormMrp(e.target.value); clearFormError("mrpSelling"); }}
+                  placeholder="Optional"
+                  className={`h-9 ${formErrors.mrpSelling ? "border-destructive" : ""}`}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Selling price (₹)</Label>
-                <Input type="number" min={0} step={0.01} value={formSellingPrice} onChange={(e) => setFormSellingPrice(e.target.value)} placeholder="Optional" className="h-9" />
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formSellingPrice}
+                  onChange={(e) => { setFormSellingPrice(e.target.value); clearFormError("mrpSelling"); }}
+                  placeholder="Optional"
+                  className={`h-9 ${formErrors.mrpSelling ? "border-destructive" : ""}`}
+                />
+                {formErrors.mrpSelling && <p className="text-xs text-destructive">{formErrors.mrpSelling}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Discount %</Label>

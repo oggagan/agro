@@ -87,6 +87,7 @@ enum ProductStatus {
 enum DoseUnit {
   PER_ACRE
   PER_HECTARE
+  PER_LITER_WATER
 }
 
 enum InventoryType {

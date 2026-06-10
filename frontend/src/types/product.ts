@@ -13,7 +13,7 @@ export type ProductType =
 
 export type ProductStatus = "DRAFT" | "PENDING" | "ACTIVE" | "INACTIVE" | "DECLINED" | "REVERIFY";
 
-export type DoseUnit = "PER_ACRE" | "PER_HECTARE";
+export type DoseUnit = "PER_ACRE" | "PER_HECTARE" | "PER_LITER_WATER";
 
 export interface ProductSize {
   id: string;
